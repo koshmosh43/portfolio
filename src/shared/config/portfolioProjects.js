@@ -43,7 +43,20 @@ export const portfolioProjects = Object.freeze({
     subtitle: 'Cloud products, subscriptions, and scalable web platforms',
     projects: [
       {
-        title: 'Lingio',
+        title: 'ESports: Keydrop',
+        description:
+          'One of the world’s largest CS2 skin-trading and case-opening platforms — high-volume marketplace UX, drops and cases, and real-time inventory and trading flows for a global player base.',
+        videoUrl: 'https://www.youtube.com/watch?v=U69VdMqP1OU',
+        linkUrl: 'https://www.keydrop.com/',
+        linkLabel: 'keydrop.com',
+      },
+      {
+        title: 'ESports: GetInPro',
+        description: 'Esports platform for competitive play, tournaments, and player experience — web product in the gaming scene.',
+        videoUrl: 'https://www.youtube.com/watch?v=CS4fQ7l22Q0',
+      },
+      {
+        title: 'Lingio - language-learning app',
         description:
           'Enterprise language-learning SaaS for working professionals: I shipped major parts on SvelteKit with voice recognition for faster speaking practice, role- and industry-specific flows, and gamified lessons aimed at real workplaces.',
         videoUrl: 'https://youtu.be/-vzhZOOu1Xw',
@@ -71,14 +84,6 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=COOIWnJuskU',
         linkUrl: 'https://www.askgamblers.com/online-casinos/reviews/mamamia-bingo-casino',
         linkLabel: 'AskGamblers review',
-      },
-      {
-        title: 'Keydrop',
-        description:
-          'One of the world’s largest CS2 skin-trading and case-opening platforms — high-volume marketplace UX, drops and cases, and real-time inventory and trading flows for a global player base.',
-        videoUrl: 'https://www.youtube.com/watch?v=U69VdMqP1OU',
-        linkUrl: 'https://www.keydrop.com/',
-        linkLabel: 'keydrop.com',
       },
     ],
   },
