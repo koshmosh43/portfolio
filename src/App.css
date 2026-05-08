@@ -1097,21 +1097,59 @@ h2 {
 }
 
 @media (max-width: 560px) {
+  /**
+   * AR/VR mask cards: keep the same left-video + right-stills grid as desktop,
+   * but sized so the glass band matches ~16:10 preview height of other planet cards.
+   */
   .project-card-ar-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    min-height: 0;
     max-height: none;
   }
 
   .project-card--ar-mask .project-card-preview {
     width: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .project-card-preview--ar :is(video, iframe, .project-video-thumb) {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    aspect-ratio: unset;
+    min-height: 0;
+  }
+
+  .project-card-preview--ar video {
+    object-fit: cover;
+  }
+
+  .project-card-preview--ar .project-video-thumb img {
+    object-fit: cover;
+    height: 100%;
   }
 
   .project-card--ar-mask .project-card-screenshots {
-    margin-top: 5px;
-    min-height: clamp(64px, 8.8vw, 96px);
-    height: auto;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 0;
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-card--ar-mask .project-card-screenshots--pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: minmax(0, 1fr);
+    height: 100%;
   }
 
   .project-card-screenshots--pair {

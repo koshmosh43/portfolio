@@ -123,7 +123,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
       },
       {
-        title: 'Systems experiment',
+        title: 'Pots-o-Loot',
         description: 'Pots-O-Loot trailer and game page.',
         videoUrl: 'https://youtu.be/tlHt0p-hdms?si=U1Thz7_gDYQhDOvG',
         linkUrl: 'https://pearfiction.com/games/pots-o-loot/',
