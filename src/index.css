@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  min-width: 0;
+  background: linear-gradient(
+    180deg,
+    #1a2233 0%,
+    #151c2c 12%,
+    #131a28 28%,
+    #101824 42%,
+    #121c2a 52%,
+    #0e1522 66%,
+    #0c111c 82%,
+    #0a0e16 92%,
+    #070910 100%
+  );
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+}

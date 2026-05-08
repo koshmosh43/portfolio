@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="preload"
+      href="/fonts/BMXRadical.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Non-blocking: avoid render-delay on the stylesheet chain (body copy & footer). -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+    /></noscript>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Interactive 3D portfolio by Vlada Melnyk — games, playable ads, AR/VR, and product work showcased as a space scene."
+    />
+    <meta name="theme-color" content="#0a0e16" />
+    <meta property="og:title" content="Portfolio — Vlada Melnyk" />
+    <meta
+      property="og:description"
+      content="Interactive 3D portfolio — games, playable ads, AR/VR, and product work."
+    />
+    <meta property="og:type" content="website" />
+    <title>Portfolio - Vlada Melnyk</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
