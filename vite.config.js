@@ -5,9 +5,10 @@ import react from '@vitejs/plugin-react'
 const GITHUB_PAGES_BASE = '/portfolio/'
 
 function publicBase() {
-  if (process.env.VITE_BASE_PATH) {
-    const b = process.env.VITE_BASE_PATH
-    return b.endsWith('/') ? b : `${b}/`
+  const fromEnv = process.env.VITE_BASE_PATH?.trim()
+  if (fromEnv) {
+    if (fromEnv === '/' || fromEnv === '') return '/'
+    return fromEnv.endsWith('/') ? fromEnv : `${fromEnv}/`
   }
   return process.env.GITHUB_ACTIONS === 'true' ? GITHUB_PAGES_BASE : '/'
 }
@@ -21,11 +22,16 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       {
-        name: 'portfolio-base-in-html-and-fonts',
+        name: 'portfolio-base-public-fonts',
         transformIndexHtml(html) {
+          if (!html.includes('%BASE_URL%')) return html
           const prefix = base === '/' ? '/' : base.endsWith('/') ? base : `${base}/`
           return html.replace(/%BASE_URL%/g, prefix)
         },
+        /**
+         * `public/fonts/*` is emitted at `dist/fonts/*`. Root-relative `url("/fonts/...")` in CSS is not
+         * rewritten by Vite, so patch it when `base` is e.g. `/portfolio/` (GitHub Pages).
+         */
         transform(src, id) {
           if (!id.endsWith('.css')) return null
           if (!src.includes('url("/fonts/')) return null
