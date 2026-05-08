@@ -1,12 +1,12 @@
-# Publishes the Vite build to GitHub Pages (project site: /portfolio/).
-# Repo: https://github.com/koshmosh43/portfolio
-# After the first successful run, enable: Settings → Pages → Build: GitHub Actions.
+# Site: https://koshmosh43.github.io/portfolio/
+# Enable once: Repo → Settings → Pages → Build: GitHub Actions (not “Deploy from branch”).
 
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,10 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,5 +33,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
