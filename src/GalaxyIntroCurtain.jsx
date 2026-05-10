@@ -101,7 +101,6 @@ export function GalaxyIntroCurtain({
             fetchpriority="high"
             loading="eager"
           />
-        </div>
         <div className={`galaxy-intro-curtain__load ${reducedMotion ? 'is-reduced' : ''}`}>
           <div className="galaxy-intro-curtain__load-head">
             {done ? (
@@ -163,6 +162,7 @@ export function GalaxyIntroCurtain({
               />
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
