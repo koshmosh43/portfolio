@@ -292,7 +292,7 @@
   /* Same vertical slot as [spinner + big %] so bar Y doesn’t jump on “You’re all set!” */
   min-height: max(
     clamp(40px, 9vmin, 52px),
-    calc(0.88 * clamp(2.75rem, 11vw, 4.85rem))
+    calc(0.88 * clamp(2.75rem, 11vw, 4.55rem))
   );
   box-sizing: border-box;
 }
@@ -308,6 +308,14 @@
   height: clamp(40px, 9vmin, 52px);
   flex-shrink: 0;
   overflow: visible !important;
+}
+
+/* Same box as orbit — keeps readout column + bar Y stable when “You’re all set!” */
+.galaxy-intro-curtain__orbit-ghost {
+  display: block;
+  width: clamp(40px, 9vmin, 52px);
+  height: clamp(40px, 9vmin, 52px);
+  flex-shrink: 0;
 }
 
 .galaxy-intro-orbit-svg__spin {
@@ -333,10 +341,15 @@
   animation: galaxy-intro-jh3y-spin 3.5s linear infinite reverse;
 }
 
+/* Softer full-ring wash so the dashed arc reads as an open “ouroboros” tail */
+.galaxy-intro-orbit-svg:not(.is-reduced)[data-animate='true'] .galaxy-intro-orbit-svg__ring-glow {
+  opacity: 0.34;
+}
+
+/* ~⅓ of the loop drawn; gap shows rotation — gradient fades head/tail on the stroke */
 .galaxy-intro-orbit-svg:not(.is-reduced)[data-animate='true'] .galaxy-intro-orbit-svg__arc {
-  stroke-dasharray: 1.05;
-  animation: galaxy-intro-jh3y-draw 2s ease-in-out infinite;
-  animation-direction: reverse;
+  stroke-dasharray: 0.34 0.66;
+  stroke-dashoffset: 0;
 }
 
 .galaxy-intro-orbit-svg.is-reduced .galaxy-intro-orbit-svg__spin {
@@ -389,7 +402,9 @@
 }
 
 .galaxy-intro-curtain__track {
+  position: relative;
   height: 5px;
+  direction: ltr;
   border-radius: 999px;
   background: linear-gradient(
     180deg,
@@ -404,12 +419,17 @@
 }
 
 .galaxy-intro-curtain__fill {
-  position: relative;
-  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin: 0;
   border-radius: inherit;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
-  transition: width 340ms cubic-bezier(0.2, 0.85, 0.25, 1);
+  /* Width from inline; anchor left — never “from center” in RTL or flex quirks. */
+  transition: width 320ms cubic-bezier(0.2, 0.85, 0.25, 1);
   background: linear-gradient(
     94deg,
     color-mix(in srgb, var(--pen-magenta) 75%, #1a1020) 0%,
@@ -446,7 +466,7 @@
     rgba(255, 255, 255, 0.55) 48%,
     transparent 100%
   );
-  transform: translateX(-120%);
+  transform: translateX(-100%);
   animation: galaxy-intro-fill-sheen 2.1s cubic-bezier(0.45, 0, 0.2, 1) infinite;
   pointer-events: none;
 }
@@ -488,9 +508,7 @@
   align-items: center;
   justify-content: center;
   gap: clamp(0.35rem, 1.8vw, 0.55rem);
-  flex-wrap: wrap;
   text-align: center;
-  max-width: min(100%, 22rem);
 }
 
 .galaxy-intro-curtain__pct-check {
@@ -501,9 +519,10 @@
 }
 
 .galaxy-intro-curtain__pct-ready {
-  font-size: clamp(1.1rem, 4vw, 1.85rem);
+  font-size: clamp(0.95rem, 3.5vw, 1.65rem);
   font-weight: 800;
   letter-spacing: -0.04em;
+  white-space: nowrap;
   color: var(--pen-text);
   text-shadow:
     0 0 28px color-mix(in srgb, var(--pen-mint) 30%, transparent),
@@ -512,7 +531,7 @@
 }
 
 .galaxy-intro-curtain__pct-num {
-  font-size: clamp(2.75rem, 11vw, 4.85rem);
+  font-size: clamp(2.75rem, 11vw, 4.55rem);
   font-weight: 800;
   color: var(--pen-text);
   text-shadow:
@@ -576,21 +595,6 @@
 @keyframes galaxy-intro-jh3y-spin {
   to {
     transform: rotate(-360deg);
-  }
-}
-
-@keyframes galaxy-intro-jh3y-draw {
-  0%,
-  5% {
-    stroke-dashoffset: 1.05;
-  }
-  45%,
-  55% {
-    stroke-dashoffset: 2.1;
-  }
-  95%,
-  100% {
-    stroke-dashoffset: 3.15;
   }
 }
 

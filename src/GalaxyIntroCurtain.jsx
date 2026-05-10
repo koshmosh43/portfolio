@@ -51,7 +51,7 @@ export function GalaxyIntroCurtain({
         if (deferred3d && !canvasReady && deferredAt.current) {
           const elapsed = (performance.now() - deferredAt.current) / 1000
           const creep = Math.min(28, elapsed * 14)
-          target = Math.max(target, Math.min(98, 66 + creep))
+          target = Math.max(target, Math.min(99, 66 + creep))
         }
         if (prev >= target) return prev
         const step = Math.max(1, Math.ceil((target - prev) / 1.65))
@@ -79,6 +79,9 @@ export function GalaxyIntroCurtain({
   }, [canvasReady, onRevealComplete, reducedMotion])
 
   const done = pct >= 100
+  /* Readout + bar: integers 0–99 tied to load; 100% = done UI only (no “100” numeral). */
+  const loadPct = Math.min(99, Math.max(0, Math.round(Number(pct))))
+  const barLinear01 = done ? 1 : loadPct / 100
 
   return (
     <div
@@ -100,10 +103,12 @@ export function GalaxyIntroCurtain({
           />
         </div>
         <div className={`galaxy-intro-curtain__load ${reducedMotion ? 'is-reduced' : ''}`}>
-          <div
-            className={`galaxy-intro-curtain__load-head${done ? ' galaxy-intro-curtain__load-head--done' : ''}`}
-          >
-            {!done ? <IntroOrbitSvg reduced={reducedMotion} /> : null}
+          <div className="galaxy-intro-curtain__load-head">
+            {done ? (
+              <span className="galaxy-intro-curtain__orbit-ghost" aria-hidden />
+            ) : (
+              <IntroOrbitSvg reduced={reducedMotion} />
+            )}
             <div className="galaxy-intro-curtain__readout">
               <p className={`galaxy-intro-curtain__pct-big${done ? ' galaxy-intro-curtain__pct-big--done' : ''}`}>
                 {done ? (
@@ -141,7 +146,7 @@ export function GalaxyIntroCurtain({
                   </span>
                 ) : (
                   <>
-                    <span className="galaxy-intro-curtain__pct-num">{Math.round(pct)}</span>
+                    <span className="galaxy-intro-curtain__pct-num">{loadPct}</span>
                     <span className="galaxy-intro-curtain__pct-sym">%</span>
                   </>
                 )}
@@ -152,7 +157,9 @@ export function GalaxyIntroCurtain({
             <div className="galaxy-intro-curtain__track">
               <div
                 className="galaxy-intro-curtain__fill"
-                style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }}
+                style={{
+                  width: `${Math.round(barLinear01 * 10000) / 100}%`,
+                }}
               />
             </div>
           </div>

@@ -62,15 +62,16 @@ export function IntroOrbitSvg({ reduced }) {
           <stop offset="0.68" stopColor="#5eadff" stopOpacity="0.16" />
           <stop offset="1" stopColor="#7bc49a" stopOpacity="0" />
         </linearGradient>
-        {/* Arc: long transparent tails + mint / blue / magenta core — matches progress bar read */}
-        <linearGradient id={gArc} x1="3.5" y1="20.5" x2="20.5" y2="3.5" gradientUnits="userSpaceOnUse">
+        {/* Arc: ouroboros — long transparent tail/head so color never “closes”; bright mid only */}
+        <linearGradient id={gArc} x1="2.5" y1="21.5" x2="21.5" y2="2.5" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#5eadff" stopOpacity="0" />
-          <stop offset="0.07" stopColor="#5eadff" stopOpacity="0.05" />
-          <stop offset="0.22" stopColor="#c8ffd8" stopOpacity="0.28" />
-          <stop offset="0.4" stopColor="#ff6ef7" stopOpacity="0.78" />
-          <stop offset="0.52" stopColor="#5eadff" stopOpacity="0.42" />
-          <stop offset="0.68" stopColor="#c8ffd8" stopOpacity="0.2" />
-          <stop offset="0.85" stopColor="#ffb078" stopOpacity="0.08" />
+          <stop offset="0.14" stopColor="#5eadff" stopOpacity="0" />
+          <stop offset="0.24" stopColor="#c8ffd8" stopOpacity="0.18" />
+          <stop offset="0.36" stopColor="#5eadff" stopOpacity="0.42" />
+          <stop offset="0.48" stopColor="#ff6ef7" stopOpacity="0.9" />
+          <stop offset="0.58" stopColor="#c8ffd8" stopOpacity="0.55" />
+          <stop offset="0.72" stopColor="#5eadff" stopOpacity="0.22" />
+          <stop offset="0.86" stopColor="#ffb078" stopOpacity="0.06" />
           <stop offset="1" stopColor="#ff6ef7" stopOpacity="0" />
         </linearGradient>
         <mask id={mid}>
@@ -97,7 +98,7 @@ export function IntroOrbitSvg({ reduced }) {
         stroke={`url(#${gTrack})`}
       />
       <g className="galaxy-intro-orbit-svg__spin" style={{ filter: glow ? `url(#${fid})` : undefined }}>
-        <g mask={`url(#${mid})`}>
+        <g className="galaxy-intro-orbit-svg__ring-glow" mask={`url(#${mid})`}>
           <rect fill={`url(#${ga})`} width="24" height="24" />
           <rect fill={`url(#${gb})`} width="24" height="24" />
           <rect fill={`url(#${gc})`} width="24" height="24" />
@@ -114,7 +115,7 @@ export function IntroOrbitSvg({ reduced }) {
           strokeWidth="4"
           strokeLinecap="round"
           stroke={`url(#${gArc})`}
-          pathLength="1.05"
+          pathLength="1"
         />
       </g>
     </svg>
