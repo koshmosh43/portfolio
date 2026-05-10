@@ -70,7 +70,7 @@ export function CentralGalaxy() {
     const macro = gsap
       .timeline({ repeat: -1, yoyo: true })
       .to(s, {
-        duration: 15,
+        duration: 10,
         pulse: 1.06,
         intensityA: 1.16,
         intensityB: 0.95,
@@ -80,7 +80,7 @@ export function CentralGalaxy() {
         ease: 'sine.inOut',
       })
       .to(s, {
-        duration: 8.5,
+        duration: 6.5,
         pulse: 0.96,
         intensityA: 1.05,
         intensityB: 0.86,
@@ -92,9 +92,9 @@ export function CentralGalaxy() {
 
     const boost = gsap
       .timeline({ repeat: -1, defaults: { ease: 'sine.inOut' } })
-      .to(s, { duration: 9, spinBoostA: 1.06, spinBoostB: 0.96 })
-      .to(s, { duration: 8.5, spinBoostA: 0.97, spinBoostB: 1.05 })
-      .to(s, { duration: 10, spinBoostA: 1.02, spinBoostB: 1.0 })
+      .to(s, { duration: 6.5, spinBoostA: 1.08, spinBoostB: 0.94 })
+      .to(s, { duration: 6.2, spinBoostA: 0.96, spinBoostB: 1.08 })
+      .to(s, { duration: 7, spinBoostA: 1.03, spinBoostB: 1.0 })
 
     const burst = gsap
       .timeline({ repeat: -1, repeatDelay: 15, defaults: { ease: 'sine.inOut' } })
@@ -108,9 +108,9 @@ export function CentralGalaxy() {
       const a = diskAMeshRef.current
       const b = diskBMeshRef.current
       if (a)
-        spinA = gsap.to(a.rotation, { z: `+=${Math.PI * 2}`, duration: 118, repeat: -1, ease: 'none' })
+        spinA = gsap.to(a.rotation, { z: `+=${Math.PI * 2}`, duration: 52, repeat: -1, ease: 'none' })
       if (b)
-        spinB = gsap.to(b.rotation, { z: `-=${Math.PI * 2}`, duration: 168, repeat: -1, ease: 'none' })
+        spinB = gsap.to(b.rotation, { z: `-=${Math.PI * 2}`, duration: 68, repeat: -1, ease: 'none' })
     }
     let raf2 = 0
     const raf1 = requestAnimationFrame(() => {
@@ -137,22 +137,22 @@ export function CentralGalaxy() {
     if (rootRef.current) {
       rootRef.current.position.copy(GALAXY_WORLD_POS).addScaledVector(GALAXY_FORWARD, state.depth * 0.04)
       scratchEuler.setFromQuaternion(GALAXY_WORLD_QUAT)
-      scratchEuler.z = state.roll + Math.sin(t * 0.185) * 0.012
-      scratchEuler.x = state.tilt + Math.cos(t * 0.155 + 0.8) * 0.009
+      scratchEuler.z = state.roll + Math.sin(t * 0.28) * 0.014
+      scratchEuler.x = state.tilt + Math.cos(t * 0.22 + 0.8) * 0.011
       rootRef.current.setRotationFromEuler(scratchEuler)
     }
 
     if (diskARef.current) {
-      const burstSpin = 1 + state.burst * 0.085
-      diskARef.current.uTime = t * (0.275 * state.spinBoostA * burstSpin)
-      diskARef.current.uIntensity = state.intensityA * (1 + state.flare * 0.12)
-      diskARef.current.uBlob.set(0.04 + Math.sin(t * 0.034) * 0.008, -0.018 + Math.cos(t * 0.037) * 0.007)
+      const burstSpin = 1 + state.burst * 0.11
+      diskARef.current.uTime = t * (0.72 * state.spinBoostA * burstSpin)
+      diskARef.current.uIntensity = state.intensityA * (1 + state.flare * 0.14)
+      diskARef.current.uBlob.set(0.04 + Math.sin(t * 0.08) * 0.012, -0.018 + Math.cos(t * 0.094) * 0.012)
     }
     if (diskBRef.current) {
-      const burstSpin = 1 + state.burst * 0.072
-      diskBRef.current.uTime = t * (0.23 * state.spinBoostB * burstSpin) + 4.2
-      diskBRef.current.uIntensity = state.intensityB * (1 + state.flare * 0.1)
-      diskBRef.current.uBlob.set(-0.03 + Math.sin(t * 0.031 + 1.3) * 0.007, 0.024 + Math.cos(t * 0.034 + 0.6) * 0.006)
+      const burstSpin = 1 + state.burst * 0.095
+      diskBRef.current.uTime = t * (0.66 * state.spinBoostB * burstSpin) + 4.2
+      diskBRef.current.uIntensity = state.intensityB * (1 + state.flare * 0.12)
+      diskBRef.current.uBlob.set(-0.03 + Math.sin(t * 0.076 + 1.3) * 0.01, 0.024 + Math.cos(t * 0.088 + 0.6) * 0.01)
     }
     if (coreRef.current) {
       const s = state.pulse * (1 + Math.sin(t * 0.11) * 0.012) * (1 + state.flare * 0.08)

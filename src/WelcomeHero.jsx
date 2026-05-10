@@ -1,6 +1,13 @@
 import gsap from 'gsap'
 import { memo, useEffect, useLayoutEffect, useRef } from 'react'
-import { HERO_CTA, HERO_GLOW_MS, HERO_INTRO, WELCOME_TOTAL_CHARS } from './welcomeConstants'
+import {
+  HERO_CTA,
+  HERO_GLOW_MS,
+  HERO_INTRO,
+  HERO_INTRO_HOLD_MS,
+  HERO_SUN_JOKE,
+  WELCOME_TOTAL_CHARS,
+} from './welcomeConstants'
 
 /** Upward arch (∩): center lifted, edges slightly fanned — GSAP still targets outer .welcome-hero__char. */
 const ACCENT_ARCH_LIFT_EM = 0.14
@@ -67,12 +74,14 @@ export const WelcomeHero = memo(function WelcomeHero({
   introRevealed = false,
   isVisible = true,
   prefersReducedMotion = false,
+  ctaSunJoke = false,
 }) {
   const introPhaseRef = useRef(null)
   const ctaPhaseRef = useRef(null)
   const tlRef = useRef(null)
   const prevIntroRef = useRef(introRevealed)
   const prevVisibleRef = useRef(isVisible)
+  const prevJokeRef = useRef(ctaSunJoke)
 
   useEffect(() => {
     onVisibleCountChange?.(WELCOME_TOTAL_CHARS)
@@ -181,15 +190,52 @@ export const WelcomeHero = memo(function WelcomeHero({
     return () => tlRef.current?.kill()
   }, [introRevealed, isVisible, reduced])
 
+  useLayoutEffect(() => {
+    if (reduced || !introRevealed) {
+      prevJokeRef.current = ctaSunJoke
+      return
+    }
+    if (prevJokeRef.current === ctaSunJoke) return
+    prevJokeRef.current = ctaSunJoke
+    const root = ctaPhaseRef.current
+    if (!root) return
+    const ctaChars = collectChars(root)
+    gsap.killTweensOf(ctaChars)
+    gsap.fromTo(
+      ctaChars,
+      { opacity: 0, scale: 0.72, y: 10, rotation: -14 },
+      {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        rotation: 0,
+        duration: 0.42,
+        ease: 'power3.out',
+        stagger: { amount: 0.52, from: 'center' },
+      },
+    )
+  }, [ctaSunJoke, introRevealed, reduced])
+
+  const ctaCopy = ctaSunJoke ? HERO_SUN_JOKE : HERO_CTA
   const phasesClass = ['welcome-hero__phases', introRevealed && 'welcome-hero__phases--cta-mode']
     .filter(Boolean)
     .join(' ')
 
   return (
     <div
-      className={['welcome-hero', reduced ? 'welcome-hero--reduced' : ''].filter(Boolean).join(' ')}
-      style={{ '--welcome-glow-ms': `${glowMs}ms` }}
-      aria-label={`${HERO_INTRO.accent} ${HERO_INTRO.tailMid} ${HERO_INTRO.tailLast}. ${HERO_CTA.accent} ${HERO_CTA.tailMid} ${HERO_CTA.tailLast}.`}
+      className={[
+        'welcome-hero',
+        reduced ? 'welcome-hero--reduced' : '',
+        !isVisible && 'welcome-hero--input-off',
+        introRevealed && ctaSunJoke && 'welcome-hero--cta-sun-joke',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        '--welcome-glow-ms': `${glowMs}ms`,
+        '--welcome-intro-hold-ms': reduced ? `0ms` : `${HERO_INTRO_HOLD_MS}ms`,
+      }}
+      aria-label={`${HERO_INTRO.accent} ${HERO_INTRO.tailMid} ${HERO_INTRO.tailLast}. ${ctaCopy.accent} ${ctaCopy.tailMid} ${ctaCopy.tailLast}.`}
       onCopy={(e) => e.preventDefault()}
       onCut={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}
@@ -213,9 +259,10 @@ export const WelcomeHero = memo(function WelcomeHero({
           aria-hidden={!introRevealed}
         >
           <PhaseChars
-            accent={HERO_CTA.accent}
-            tailMid={HERO_CTA.tailMid}
-            tailLast={HERO_CTA.tailLast}
+            key={ctaSunJoke ? 'cta-sun' : 'cta-planet'}
+            accent={ctaCopy.accent}
+            tailMid={ctaCopy.tailMid}
+            tailLast={ctaCopy.tailLast}
           />
         </div>
       </div>

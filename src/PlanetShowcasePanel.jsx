@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom'
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useAmbientGlowPointer } from './shared/hooks/useAmbientGlowPointer'
 import { gsap } from 'gsap'
 import { ExternalLink } from './shared/ui/ExternalLink'
 import { PanelHeader } from './shared/ui/PanelHeader'
@@ -459,6 +460,7 @@ function PlanetShowcasePanelComponent({ showcase, onBack }) {
   const gridRef = useRef(null)
   const [shotLightbox, setShotLightbox] = useState(null)
   const preloadedShotsRef = useRef(new Set())
+  const onCardAmbientMove = useAmbientGlowPointer()
 
   const preloadShot = useCallback((viewUrl) => {
     const fullSrc = getGoogleDriveFullImageUrl(viewUrl)
@@ -542,9 +544,13 @@ function PlanetShowcasePanelComponent({ showcase, onBack }) {
           const isArMaskCard = shotCount >= 2 && shotCount <= 4
           return (
             <article
-              className={`project-card${isArMaskCard ? ' project-card--ar-mask' : ''}`}
+              className={`project-card ambient-glow-frame ambient-glow-frame--subtle${
+                isArMaskCard ? ' project-card--ar-mask' : ''
+              }`}
               key={project.title}
+              onPointerMove={onCardAmbientMove}
             >
+              <div className="project-card__ambient-inner">
               {isArMaskCard ? (
                 <div
                   className="project-card-ar-layout"
@@ -606,6 +612,7 @@ function PlanetShowcasePanelComponent({ showcase, onBack }) {
                   {project.linkLabel ?? project.linkUrl}
                 </ExternalLink>
               ) : null}
+              </div>
             </article>
           )
         })}

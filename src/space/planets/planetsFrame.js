@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import {
+  PLANET_BODY_SPIN,
   PLANET_D_RING_BASE_ROT,
   PLANET_D_RING_FOCUS_ROT,
   PLANET_D_RING_SPIN_AXIS,
@@ -15,43 +16,49 @@ const saasRingSpinScratch = {
   axis: new THREE.Vector3(),
 }
 
+const planetSpinAxisScratch = new THREE.Vector3()
+
+function spinPlanetBodyAroundTiltedAxis(obj, ax, ay, az, angularSpeed) {
+  planetSpinAxisScratch.set(ax, ay, az).normalize()
+  obj.rotateOnAxis(planetSpinAxisScratch, angularSpeed)
+}
+
 export function createPlanetFrameDefs(refs) {
   return {
     planetBodyFramePairs: [
       [
         refs.planetA,
-        (t, o) => {
-          o.rotation.y += 0.0031
-          o.rotation.z = 0
+        (_, o) => {
+          const { axis, speed } = PLANET_BODY_SPIN.A
+          spinPlanetBodyAroundTiltedAxis(o, axis[0], axis[1], axis[2], speed)
         },
       ],
       [
         refs.planetB,
-        (t, o) => {
-          o.rotation.y += 0.0028
-          o.rotation.x = Math.sin(t * 0.3) * 0.025
-          o.rotation.z = 0
+        (_, o) => {
+          const { axis, speed } = PLANET_BODY_SPIN.B
+          spinPlanetBodyAroundTiltedAxis(o, axis[0], axis[1], axis[2], speed)
         },
       ],
       [
         refs.planetC,
-        (t, o) => {
-          o.rotation.y += 0.0024
-          o.rotation.x = Math.sin(t * 0.26) * 0.022
+        (_, o) => {
+          const { axis, speed } = PLANET_BODY_SPIN.C
+          spinPlanetBodyAroundTiltedAxis(o, axis[0], axis[1], axis[2], speed)
         },
       ],
       [
         refs.planetD,
-        (t, o) => {
-          o.rotation.y += 0.00255
-          o.rotation.x = Math.sin(t * 0.24 + 0.4) * 0.018
+        (_, o) => {
+          const { axis, speed } = PLANET_BODY_SPIN.D
+          spinPlanetBodyAroundTiltedAxis(o, axis[0], axis[1], axis[2], speed)
         },
       ],
       [
         refs.planetE,
-        (t, o) => {
-          o.rotation.y += 0.0036
-          o.rotation.x = Math.sin(t * 0.4 + 0.8) * 0.02
+        (_, o) => {
+          const { axis, speed } = PLANET_BODY_SPIN.E
+          spinPlanetBodyAroundTiltedAxis(o, axis[0], axis[1], axis[2], speed)
         },
       ],
     ],

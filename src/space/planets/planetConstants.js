@@ -17,6 +17,15 @@ export const PLANET_D_RING_FOCUS_ROT = Object.freeze([1.04, -0.78, 0.56])
  * Tuned so motion reads as bottom-left → top-right on the default tableau.
  */
 export const PLANET_D_RING_SPIN_AXIS = Object.freeze([0.82, 0.82, 0.28])
+
+/** Planet body spin: each axis slightly tilted from local Y; speeds differ per planet. */
+export const PLANET_BODY_SPIN = Object.freeze({
+  A: Object.freeze({ axis: [0.14, 0.986, -0.1], speed: 0.0031 }),
+  B: Object.freeze({ axis: [-0.1, 0.991, 0.12], speed: 0.0028 }),
+  C: Object.freeze({ axis: [0.17, 0.976, 0.13], speed: 0.0024 }),
+  D: Object.freeze({ axis: [-0.13, 0.983, -0.11], speed: 0.00255 }),
+  E: Object.freeze({ axis: [0.08, 0.994, 0.15], speed: 0.0036 }),
+})
 /**
  * SaaS dust ring: spin angle only wobbles between these degrees (around `PLANET_D_RING_SPIN_AXIS`),
  * not a full 360° loop. Tune here if you want a wider or narrower sway.

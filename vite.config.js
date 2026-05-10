@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 /** GitHub Pages project site: https://<user>.github.io/<repo>/ */
 const GITHUB_PAGES_BASE = '/portfolio/'
@@ -20,6 +21,7 @@ export default defineConfig(({ mode }) => {
   return {
     base,
     plugins: [
+      tailwindcss(),
       react(),
       {
         name: 'portfolio-base-public-fonts',
@@ -47,6 +49,12 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'es2022',
       chunkSizeWarningLimit: 800,
+      ...(mode === 'production'
+        ? {
+            minify: 'terser',
+            terserOptions: { format: { comments: false } },
+          }
+        : {}),
       /** Fewer eager preload edges for secondary chunks — improves “unused JS” on cold Lighthouse traces. */
       modulePreload: { polyfill: false },
       rollupOptions: {

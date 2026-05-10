@@ -279,8 +279,9 @@ function createProfile(viewport) {
   const height = viewport?.height ?? 900
   const aspect = viewport?.aspect ?? width / height
   const mobile = width < 700 || aspect < 0.78
-  const tablet = !mobile && width < 1100
-  const isPortraitMobileTablet = (mobile || tablet) && aspect < 1
+  const isPortrait = aspect < 1
+  const tablet = !mobile && isPortrait
+  const isPortraitMobileTablet = mobile || tablet
   const focusCameraMulDesktop = mobile ? 1.16 : tablet ? 1.08 : 1
   const focusCameraMulPortrait = 1
 
@@ -331,7 +332,16 @@ function createFocus(planetId, target, profile) {
   const shipPos = add3(lookAt, offsets.ship, profile.focusCameraMul)
   const shipYMul = 1
   shipPos[1] = lookAt[1] + (shipPos[1] - lookAt[1]) * shipYMul
-  return { lookAt, cameraPos, shipPos, ...offsets.meta }
+  const meta = { ...offsets.meta }
+  const out = { lookAt, cameraPos, shipPos, ...meta }
+  /**
+   * Portrait tablet: a straight idle→Playable Ads (planetC) path clips planetE (AR/VR).
+   * Waypoint is closer to the camera (+Z) and farther right (+X); final shipPos unchanged.
+   */
+  if (planetId === 'planetC' && profile.isPortraitMobileTablet && profile.device === 'tablet') {
+    out.shipWaypoint = add3(lookAt, [0.82, -0.18, 1.55])
+  }
+  return out
 }
 
 const PLANET_IDS_FOR_SUN = ['planetA', 'planetB', 'planetC', 'planetD', 'planetE']

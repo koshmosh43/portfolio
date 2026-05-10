@@ -1,6 +1,6 @@
 import { startTransition, useCallback, useEffect, useMemo, useReducer } from 'react'
 import { pick } from 'remeda'
-import { CTA_REVEAL_DELAY_MS } from '../../welcomeConstants.js'
+import { CTA_REVEAL_DELAY_MS, HERO_INTRO_HOLD_MS } from '../../welcomeConstants.js'
 
 export const portfolioPhases = Object.freeze({
   intro: 'intro',
@@ -72,9 +72,10 @@ export function usePortfolioFlow({ prefersReducedMotion, projectsByPlanet }) {
 
   useEffect(() => {
     if (!state.curtainDismissed) return undefined
-    dispatch({ type: 'HERO_CTA_READY' })
-    return undefined
-  }, [state.curtainDismissed])
+    const ms = prefersReducedMotion ? 120 : HERO_INTRO_HOLD_MS
+    const t = setTimeout(() => dispatch({ type: 'HERO_CTA_READY' }), ms)
+    return () => clearTimeout(t)
+  }, [prefersReducedMotion, state.curtainDismissed])
 
   const onCanvasReady = useCallback(() => dispatch({ type: 'CANVAS_READY' }), [])
   const onCurtainRevealComplete = useCallback(

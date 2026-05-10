@@ -1,13 +1,10 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { WELCOME_TOTAL_CHARS } from '../welcomeConstants'
 import pilotSticker from '../assets/sticker.webp'
-import { SHIP_EMERGE_START } from './shipConstants'
-
-function easeOutCubic(t) {
-  return 1 - Math.pow(1 - t, 3)
-}
+import { easeOutQuint, HERO_POST_CURTAIN_FLIGHT_S, sampleHeroShipFlight } from './heroFlightPath'
+import { heroShipCameraBridge, pushHeroTrail } from './heroShipCameraBridge'
 
 function laserHash01(n) {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
@@ -421,24 +418,43 @@ function LaserEmitter({ side, texture, refs, baseY }) {
   )
 }
 
-export function Spaceship({ focus, isFocused = false, welcomeVisibleCount = WELCOME_TOTAL_CHARS }) {
+export function Spaceship({
+  focus,
+  isFocused = false,
+  welcomeVisibleCount = WELCOME_TOTAL_CHARS,
+  curtainDismissed = false,
+  prefersReducedMotion = false,
+}) {
   const { gl, camera, size } = useThree()
   const isPortrait = size.height > size.width
   const shipLift = isPortrait ? SHIP_LIFT_PORTRAIT : SHIP_LIFT_DESKTOP
   const group = useRef()
-  const emergeStart = useMemo(() => new THREE.Vector3().fromArray(SHIP_EMERGE_START), [])
-  const emergeScratch = useRef(new THREE.Vector3())
-  const shipTarget = useRef(new THREE.Vector3().fromArray(SHIP_EMERGE_START))
+  const heroFlightClock0 = useRef(null)
+  const heroIntroPlayed = useRef(false)
+  const heroFlightSample = useRef(new THREE.Vector3())
+  const shipTarget = useRef(new THREE.Vector3())
   const shipScaleTarget = useRef(new THREE.Vector3(1, 1, 1))
   const wasFocused = useRef(false)
   const isReturning = useRef(false)
   const idleTime = useRef(0)
   const savedState = useRef({
-    position: new THREE.Vector3().fromArray(SHIP_EMERGE_START),
+    position: new THREE.Vector3(),
     rotationY: 0,
     rotationZ: 0,
     scale: new THREE.Vector3(1, 1, 1),
   })
+
+  const shipSpawn = useMemo(() => {
+    const v = new THREE.Vector3()
+    sampleHeroShipFlight(v, 0, shipLift)
+    return [v.x, v.y, v.z]
+  }, [shipLift])
+
+  useLayoutEffect(() => {
+    sampleHeroShipFlight(shipTarget.current, 0, shipLift)
+    sampleHeroShipFlight(savedState.current.position, 0, shipLift)
+    if (group.current) group.current.position.set(shipTarget.current.x, shipTarget.current.y, shipTarget.current.z)
+  }, [shipLift])
   const laserRefs = useRef({
     right: createLaserSideRefs(),
     left: createLaserSideRefs(),
@@ -482,6 +498,10 @@ export function Spaceship({ focus, isFocused = false, welcomeVisibleCount = WELC
       targetPos: new THREE.Vector3(),
       targetScale: new THREE.Vector3(),
     }),
+    [],
+  )
+  const shipPathScratch = useMemo(
+    () => ({ final: new THREE.Vector3(), waypoint: new THREE.Vector3() }),
     [],
   )
   const stickerRef = useRef()
@@ -928,6 +948,12 @@ export function Spaceship({ focus, isFocused = false, welcomeVisibleCount = WELC
     const t = clock.elapsedTime
     if (!group.current) return
 
+    if (isFocused) {
+      heroFlightClock0.current = null
+      heroShipCameraBridge.heroFlightLinear01 = 1
+      heroShipCameraBridge.heroFlightEase01 = 1
+    }
+
     if (!wasFocused.current && isFocused) {
       savedState.current.position.copy(group.current.position)
       savedState.current.rotationY = group.current.rotation.y
@@ -936,11 +962,22 @@ export function Spaceship({ focus, isFocused = false, welcomeVisibleCount = WELC
       isReturning.current = false
     } else if (wasFocused.current && !isFocused) {
       isReturning.current = true
+      /* Avoid replaying post-curtain Bézier from off-screen if the planet was opened mid-intro. */
+      heroIntroPlayed.current = true
+      heroFlightClock0.current = null
     }
 
     if (isFocused && focus?.shipPos) {
-      const focusedTarget = new THREE.Vector3(focus.shipPos.x, focus.shipPos.y + 0.24 + shipLift, focus.shipPos.z)
-      shipTarget.current.lerp(focusedTarget, 0.05)
+      const liftY = 0.24 + shipLift
+      const { final, waypoint } = shipPathScratch
+      final.set(focus.shipPos.x, focus.shipPos.y + liftY, focus.shipPos.z)
+      let aim = final
+      if (focus.shipWaypoint) {
+        waypoint.copy(focus.shipWaypoint)
+        waypoint.y += liftY
+        if (shipTarget.current.distanceTo(waypoint) > 0.28) aim = waypoint
+      }
+      shipTarget.current.lerp(aim, 0.052)
       group.current.position.copy(shipTarget.current)
       const rollWiggle = focus?.shipRollWiggleScale ?? 1
       const rollBias = focus?.shipRollBias ?? 0
@@ -954,6 +991,8 @@ export function Spaceship({ focus, isFocused = false, welcomeVisibleCount = WELC
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, focusedYaw, 0.08)
       shipScaleTarget.current.setScalar(0.67)
     } else if (isReturning.current) {
+      heroShipCameraBridge.heroFlightLinear01 = 1
+      heroShipCameraBridge.heroFlightEase01 = 1
       shipTarget.current.lerp(savedState.current.position, 0.08)
       group.current.position.copy(shipTarget.current)
       group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, savedState.current.rotationZ, 0.08)
@@ -975,33 +1014,89 @@ export function Spaceship({ focus, isFocused = false, welcomeVisibleCount = WELC
         isReturning.current = false
       }
     } else {
-      idleTime.current += delta
-      const idleT = idleTime.current
-      const idleRest = new THREE.Vector3(
-        0.7 + Math.sin(idleT * 0.35) * 0.22,
-        -0.25 + shipLift + Math.sin(idleT * 1.5) * 0.08,
-        -2,
-      )
-      const progress = Math.min(1, welcomeVisibleCount / WELCOME_TOTAL_CHARS)
-      let idleTarget = idleRest
-      if (progress < 1) {
-        const e = easeOutCubic(progress)
-        emergeScratch.current.copy(emergeStart).lerp(idleRest, e)
-        idleTarget = emergeScratch.current
-      }
-      shipTarget.current.lerp(idleTarget, 0.08)
-      group.current.position.copy(shipTarget.current)
-      group.current.rotation.z = Math.sin(idleT * 0.9) * 0.05
-      if (progress < 1) {
-        const yaw = 0.14 * (1 - progress)
-        group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, yaw, 0.07)
+      const snapHero = heroShipCameraBridge.skipHeroCinematicOnce
+      if (snapHero) heroShipCameraBridge.skipHeroCinematicOnce = false
+
+      if (!curtainDismissed) {
+        heroFlightClock0.current = null
+        heroShipCameraBridge.heroFlightLinear01 = 0
+        heroShipCameraBridge.heroFlightEase01 = 0
+        sampleHeroShipFlight(heroFlightSample.current, 0, shipLift)
+        group.current.position.copy(heroFlightSample.current)
+        shipTarget.current.copy(heroFlightSample.current)
+        group.current.rotation.y = -0.44
+        group.current.rotation.z = 0
+        idleTime.current = 0
+      } else if (prefersReducedMotion || snapHero || heroIntroPlayed.current) {
+        heroFlightClock0.current = null
+        idleTime.current += delta
+        const idleT = idleTime.current
+        const idleRest = new THREE.Vector3(
+          0.7 + Math.sin(idleT * 0.35) * 0.22,
+          -0.25 + shipLift + Math.sin(idleT * 1.5) * 0.08,
+          -2,
+        )
+        shipTarget.current.lerp(idleRest, 0.08)
+        group.current.position.copy(shipTarget.current)
+        group.current.rotation.z = Math.sin(idleT * 0.9) * 0.05
+        group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, 0, 0.08)
+        heroShipCameraBridge.heroFlightLinear01 = 1
+        heroShipCameraBridge.heroFlightEase01 = 1
       } else {
-        group.current.rotation.y = 0
+        if (heroFlightClock0.current == null) heroFlightClock0.current = clock.elapsedTime
+        const raw = Math.min(1, (clock.elapsedTime - heroFlightClock0.current) / HERO_POST_CURTAIN_FLIGHT_S)
+        const ease = easeOutQuint(raw)
+        heroShipCameraBridge.heroFlightLinear01 = raw
+        heroShipCameraBridge.heroFlightEase01 = ease
+
+        if (ease < 0.999) {
+          sampleHeroShipFlight(heroFlightSample.current, ease, shipLift)
+          group.current.position.copy(heroFlightSample.current)
+          shipTarget.current.copy(heroFlightSample.current)
+          const turn = easeOutQuint(ease)
+          group.current.rotation.y = THREE.MathUtils.lerp(-0.44, 0, turn)
+          group.current.rotation.z = Math.sin(Math.PI * ease) * 0.11
+        } else {
+          heroIntroPlayed.current = true
+          idleTime.current += delta
+          const idleT = idleTime.current
+          const idleRest = new THREE.Vector3(
+            0.7 + Math.sin(idleT * 0.35) * 0.22,
+            -0.25 + shipLift + Math.sin(idleT * 1.5) * 0.08,
+            -2,
+          )
+          shipTarget.current.lerp(idleRest, 0.08)
+          group.current.position.copy(shipTarget.current)
+          group.current.rotation.z = Math.sin(idleT * 0.9) * 0.05
+          group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, 0, 0.08)
+          heroShipCameraBridge.heroFlightLinear01 = 1
+          heroShipCameraBridge.heroFlightEase01 = 1
+        }
       }
       shipScaleTarget.current.setScalar(1)
     }
     group.current.scale.lerp(shipScaleTarget.current, 0.08)
     wasFocused.current = isFocused
+
+    if (!isFocused && group.current) {
+      group.current.getWorldPosition(heroShipCameraBridge.shipWorld)
+      heroShipCameraBridge.emerge01 = Math.min(1, welcomeVisibleCount / WELCOME_TOTAL_CHARS)
+
+      let wake = 0
+      if (curtainDismissed && !prefersReducedMotion && heroShipCameraBridge.heroFlightEase01 < 0.992) {
+        wake = (1 - heroShipCameraBridge.heroFlightEase01) * 0.95
+      } else if (isReturning.current) {
+        const d = group.current.position.distanceTo(savedState.current.position)
+        wake = Math.min(0.84, d * 3.5)
+      }
+      heroShipCameraBridge.wakeStrength = wake
+      if (wake > 0.035) pushHeroTrail(heroShipCameraBridge.shipWorld)
+
+      heroShipCameraBridge.valid = true
+    } else {
+      heroShipCameraBridge.valid = false
+      heroShipCameraBridge.wakeStrength = 0
+    }
 
     if (stickerRef.current) {
       const mul = isFocused && focus?.pilotStickerScaleMul !== undefined ? focus.pilotStickerScaleMul : 1
@@ -1231,7 +1326,7 @@ export function Spaceship({ focus, isFocused = false, welcomeVisibleCount = WELC
   })
 
   return (
-    <group ref={group} position={SHIP_EMERGE_START}>
+    <group ref={group} position={shipSpawn}>
       <LaserEmitter side="right" texture={laserBeamTex} refs={laserRefs} baseY={0.035} />
       <LaserEmitter side="left" texture={laserBeamTex} refs={laserRefs} baseY={0.035} />
       {/*

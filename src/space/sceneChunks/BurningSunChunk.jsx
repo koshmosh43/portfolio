@@ -1,4 +1,4 @@
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
@@ -95,7 +95,8 @@ void main() {
 }
 `
 
-function BurningSun({ position = SUN_POS, scale = 1 }) {
+function BurningSun({ position = SUN_POS, scale = 1, onInteract, interactive }) {
+  const { gl } = useThree()
   const coreRef = useRef()
   const hotLightRef = useRef()
   const warmLightRef = useRef()
@@ -119,16 +120,47 @@ function BurningSun({ position = SUN_POS, scale = 1 }) {
       coreRef.current.rotation.z = Math.sin(t * 0.7) * 0.06
     }
     if (hotLightRef.current) {
-      hotLightRef.current.intensity = 0.82 + breath01 * 0.34 + (0.5 + 0.5 * Math.sin(t * 3.8 + 0.4)) * 0.26
+      hotLightRef.current.intensity =
+        0.94 + breath01 * 0.38 + (0.5 + 0.5 * Math.sin(t * 3.8 + 0.4)) * 0.32 + Math.sin(t * 5.1) * 0.12
     }
     if (warmLightRef.current) {
-      warmLightRef.current.intensity = 0.52 + breath01 * 0.26 + (0.5 + 0.5 * Math.sin(t * 2.6 + 1.3)) * 0.19
+      warmLightRef.current.intensity =
+        0.66 + breath01 * 0.32 + (0.5 + 0.5 * Math.sin(t * 2.6 + 1.3)) * 0.28 + Math.sin(t * 4.2 + 0.6) * 0.16
+      const ao = 0.5 + 0.5 * Math.sin(t * 1.9 + 0.4)
+      warmLightRef.current.color.setRGB(0.58 + ao * 0.22, 0.82 + ao * 0.14, 1.0)
     }
+
   })
+
+  const tap = (e) => {
+    e.stopPropagation()
+    if (!interactive || !onInteract) return
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    onInteract()
+  }
+
+  const sunPointer = interactive
+    ? {
+        onPointerUp: tap,
+        onPointerOver: () => {
+          gl.domElement.style.cursor = 'pointer'
+        },
+        onPointerOut: () => {
+          gl.domElement.style.cursor = 'auto'
+        },
+      }
+    : {}
 
   return (
     <group position={position.toArray()} scale={[scale, scale, scale]}>
-      <mesh ref={coreRef} castShadow={false} receiveShadow={false} renderOrder={SUN_CORE_RENDER_ORDER}>
+      <mesh
+        ref={coreRef}
+        userData={{ sunPointerHit: true }}
+        castShadow={false}
+        receiveShadow={false}
+        renderOrder={SUN_CORE_RENDER_ORDER}
+        {...sunPointer}
+      >
         <sphereGeometry args={[SUN_CORE_RADIUS, 48, 48]} />
         <shaderMaterial
           vertexShader={SUN_VERTEX_SHADER}
@@ -138,8 +170,8 @@ function BurningSun({ position = SUN_POS, scale = 1 }) {
         />
       </mesh>
 
-      <pointLight ref={hotLightRef} color="#4dc4ff" intensity={0.82} distance={4.8} decay={1.8} />
-      <pointLight ref={warmLightRef} color="#9ddbff" intensity={0.52} distance={3.9} decay={1.9} />
+      <pointLight ref={hotLightRef} color="#e6fbff" intensity={1.1} distance={5.4} decay={2.0} />
+      <pointLight ref={warmLightRef} color="#7ad7ff" intensity={0.88} distance={4.4} decay={1.95} />
     </group>
   )
 }
@@ -204,10 +236,15 @@ export function SoftSunKeyLight({
   )
 }
 
-export function SunCluster({ sunPosition, sunScale, shadowMap, sunLightTarget }) {
+export function SunCluster({ sunPosition, sunScale, shadowMap, sunLightTarget, onSunInteract, sunInteractive }) {
   return (
     <>
-      <BurningSun position={sunPosition} scale={sunScale} />
+      <BurningSun
+        position={sunPosition}
+        scale={sunScale}
+        onInteract={onSunInteract}
+        interactive={sunInteractive}
+      />
       <SoftSunKeyLight shadowMapSize={shadowMap} sunPosition={sunPosition} targetPosition={sunLightTarget} />
     </>
   )
