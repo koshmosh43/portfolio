@@ -62,16 +62,16 @@ export function IntroOrbitSvg({ reduced }) {
           <stop offset="0.68" stopColor="#5eadff" stopOpacity="0.16" />
           <stop offset="1" stopColor="#7bc49a" stopOpacity="0" />
         </linearGradient>
-        {/* Arc tail: transparent ends so curtain bg shows through the stroke */}
-        <linearGradient id={gArc} x1="3" y1="21" x2="21" y2="3" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#c8ffd8" stopOpacity="0" />
-          <stop offset="0.18" stopColor="#a8e8c4" stopOpacity="0.1" />
-          <stop offset="0.38" stopColor="#7ec4ff" stopOpacity="0.45" />
-          <stop offset="0.48" stopColor="#ffb090" stopOpacity="0.28" />
-          <stop offset="0.52" stopColor="#c8ffd8" stopOpacity="0.42" />
-          <stop offset="0.68" stopColor="#5eadff" stopOpacity="0.24" />
-          <stop offset="0.88" stopColor="#9ee8d0" stopOpacity="0.06" />
-          <stop offset="1" stopColor="#c8ffd8" stopOpacity="0" />
+        {/* Arc: long transparent tails + mint / blue / magenta core — matches progress bar read */}
+        <linearGradient id={gArc} x1="3.5" y1="20.5" x2="20.5" y2="3.5" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#5eadff" stopOpacity="0" />
+          <stop offset="0.07" stopColor="#5eadff" stopOpacity="0.05" />
+          <stop offset="0.22" stopColor="#c8ffd8" stopOpacity="0.28" />
+          <stop offset="0.4" stopColor="#ff6ef7" stopOpacity="0.78" />
+          <stop offset="0.52" stopColor="#5eadff" stopOpacity="0.42" />
+          <stop offset="0.68" stopColor="#c8ffd8" stopOpacity="0.2" />
+          <stop offset="0.85" stopColor="#ffb078" stopOpacity="0.08" />
+          <stop offset="1" stopColor="#ff6ef7" stopOpacity="0" />
         </linearGradient>
         <mask id={mid}>
           <g>

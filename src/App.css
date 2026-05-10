@@ -169,19 +169,6 @@
   mix-blend-mode: overlay;
 }
 
-.galaxy-intro-curtain::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.62;
-  background-image: var(--galaxy-curtain-grain-coarse);
-  background-size: 96px 96px;
-  mix-blend-mode: soft-light;
-  transform: translate(7%, 11%);
-}
-
 .galaxy-intro-curtain__stack {
   position: relative;
   z-index: 2;
@@ -202,9 +189,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .galaxy-intro-curtain::after {
-    opacity: 0.44;
-  }
 
   .galaxy-intro-curtain::before {
     opacity: 0.68;
@@ -248,7 +232,8 @@
 
 .galaxy-intro-curtain__load {
   position: relative;
-  width: min(100%, 480px);
+  width: 100%;
+  margin: 5% 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -303,10 +288,17 @@
   align-items: center;
   justify-content: center;
   gap: clamp(0.65rem, 2.2vw, 1.1rem);
+  width: 100%;
+  /* Same vertical slot as [spinner + big %] so bar Y doesn’t jump on “You’re all set!” */
+  min-height: max(
+    clamp(40px, 9vmin, 52px),
+    calc(0.88 * clamp(2.75rem, 11vw, 4.85rem))
+  );
+  box-sizing: border-box;
 }
 
 .galaxy-intro-curtain__load-head .galaxy-intro-curtain__readout {
-  text-align: left;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
@@ -361,6 +353,7 @@
 
 .galaxy-intro-orbit-svg__arc {
   mix-blend-mode: plus-lighter;
+  opacity: 0.96;
 }
 
 @supports not (mix-blend-mode: plus-lighter) {
@@ -472,16 +465,50 @@
 }
 
 .galaxy-intro-curtain__load .galaxy-intro-curtain__readout {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .galaxy-intro-curtain__pct-big {
   margin: 0;
+  min-width: 123px;
+  width: max-content;
   line-height: 0.88;
   font-family: 'Syne', system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums lining-nums;
+}
+
+.galaxy-intro-curtain__pct-big--done {
+  min-width: 0;
+}
+
+.galaxy-intro-curtain__pct-done {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.35rem, 1.8vw, 0.55rem);
+  flex-wrap: wrap;
+  text-align: center;
+  max-width: min(100%, 22rem);
+}
+
+.galaxy-intro-curtain__pct-check {
+  width: clamp(30px, 7.5vmin, 42px);
+  height: clamp(30px, 7.5vmin, 42px);
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--pen-mint) 38%, transparent));
+}
+
+.galaxy-intro-curtain__pct-ready {
+  font-size: clamp(1.1rem, 4vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--pen-text);
+  text-shadow:
+    0 0 28px color-mix(in srgb, var(--pen-mint) 30%, transparent),
+    0 0 48px color-mix(in srgb, var(--pen-magenta) 22%, transparent),
+    0 2px 0 rgba(0, 0, 0, 0.22);
 }
 
 .galaxy-intro-curtain__pct-num {
@@ -500,7 +527,7 @@
 }
 
 .galaxy-intro-curtain__pct-sym {
-  font-size: clamp(0.95rem, 3.4vw, 1.5rem);
+  font-size: clamp(0.95rem, 3.4vw, 2.5rem);
   margin-left: 0.04em;
   font-weight: 600;
   letter-spacing: -0.03em;

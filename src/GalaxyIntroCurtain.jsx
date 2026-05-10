@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import bieberPoster from './assets/bieber.webp'
 import { GalaxyIntroBackdrop } from './GalaxyIntroBackdrop'
 import { IntroOrbitSvg } from './IntroOrbitSvg'
@@ -20,6 +20,7 @@ export function GalaxyIntroCurtain({
   const [isClosing, setIsClosing] = useState(false)
   const [pct, setPct] = useState(0)
   const deferredAt = useRef(0)
+  const checkGradId = `galaxy-intro-pct-check-${useId().replace(/:/g, '')}`
 
   const floor = useMemo(
     () => milestoneFloor({ chunksWarmed, deferred3d, canvasReady }),
@@ -77,6 +78,8 @@ export function GalaxyIntroCurtain({
     return () => clearTimeout(completeTimer)
   }, [canvasReady, onRevealComplete, reducedMotion])
 
+  const done = pct >= 100
+
   return (
     <div
       className={`galaxy-intro-curtain ${isClosing ? 'is-closing' : ''} ${reducedMotion ? 'is-reduced-motion' : ''}`}
@@ -92,17 +95,56 @@ export function GalaxyIntroCurtain({
             width={1672}
             height={1431}
             decoding="async"
-            fetchPriority="high"
+            fetchpriority="high"
             loading="eager"
           />
         </div>
         <div className={`galaxy-intro-curtain__load ${reducedMotion ? 'is-reduced' : ''}`}>
-          <div className="galaxy-intro-curtain__load-head">
-            <IntroOrbitSvg reduced={reducedMotion} />
+          <div
+            className={`galaxy-intro-curtain__load-head${done ? ' galaxy-intro-curtain__load-head--done' : ''}`}
+          >
+            {!done ? <IntroOrbitSvg reduced={reducedMotion} /> : null}
             <div className="galaxy-intro-curtain__readout">
-              <p className="galaxy-intro-curtain__pct-big">
-                <span className="galaxy-intro-curtain__pct-num">{Math.round(pct)}</span>
-                <span className="galaxy-intro-curtain__pct-sym">%</span>
+              <p className={`galaxy-intro-curtain__pct-big${done ? ' galaxy-intro-curtain__pct-big--done' : ''}`}>
+                {done ? (
+                  <span className="galaxy-intro-curtain__pct-done">
+                    <svg
+                      className="galaxy-intro-curtain__pct-check"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden
+                    >
+                      <defs>
+                        <linearGradient
+                          id={checkGradId}
+                          x1="6"
+                          y1="12"
+                          x2="18"
+                          y2="12"
+                          gradientUnits="userSpaceOnUse"
+                        >
+                          <stop stopColor="#5eadff" />
+                          <stop offset="0.45" stopColor="#c8ffd8" />
+                          <stop offset="1" stopColor="#ff6ef7" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M6.2 12.4 10.4 16.6 17.8 7.4"
+                        stroke={`url(#${checkGradId})`}
+                        strokeWidth="2.35"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span className="galaxy-intro-curtain__pct-ready">{"You're all set!"}</span>
+                  </span>
+                ) : (
+                  <>
+                    <span className="galaxy-intro-curtain__pct-num">{Math.round(pct)}</span>
+                    <span className="galaxy-intro-curtain__pct-sym">%</span>
+                  </>
+                )}
               </p>
             </div>
           </div>
