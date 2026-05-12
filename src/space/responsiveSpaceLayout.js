@@ -94,11 +94,12 @@ const FOCUS_OFFSETS_DESKTOP = Object.freeze({
   },
   planetC: {
     lookAt: [0.13, -0.07, -0.11],
-    camera: [1.3, 0.52, 2.2],
-    ship: [0.94, -0.24, 0.7],
+    camera: [0.8, 0.52, 2.7],
+    ship: [0.8, -0.15, 0.6],
     meta: {
+      shipYaw: -0.2,
       shipGlowAttenuation: 0.4,
-      pilotStickerScaleMul: 0.75,
+      pilotStickerScaleMul: 0.95,
     },
   },
   planetD: {

@@ -4,6 +4,7 @@ import { WelcomeHero } from './WelcomeHero'
 import { usePortfolioFlow } from './features/portfolio/portfolioFlow'
 import { useSceneFlow } from './features/spaceScene/sceneFlow'
 import { portfolioProjects } from './shared/config/portfolioProjects'
+import { readNetworkProfile } from './shared/lib/networkProfile'
 import { HERO_CTA_MOTION_MS, SUN_JOKE_DISPLAY_MS, WELCOME_TOTAL_CHARS } from './welcomeConstants'
 import './App.css'
 
@@ -45,6 +46,7 @@ export default function App() {
     let idleId = 0
     let timeoutId = 0
     let started = false
+    const canIdlePrefetch = !readNetworkProfile().isDataLite
 
     const clearTimers = () => {
       if (idleId && typeof cancelIdleCallback === 'function') cancelIdleCallback(idleId)
@@ -61,10 +63,12 @@ export default function App() {
     }
 
     window.addEventListener('pointerdown', load, { passive: true, once: true })
-    if (typeof requestIdleCallback === 'function') {
-      idleId = requestIdleCallback(load, { timeout: 9000 })
-    } else {
-      timeoutId = window.setTimeout(load, 4000)
+    if (canIdlePrefetch) {
+      if (typeof requestIdleCallback === 'function') {
+        idleId = requestIdleCallback(load, { timeout: 9000 })
+      } else {
+        timeoutId = window.setTimeout(load, 4000)
+      }
     }
 
     return () => {

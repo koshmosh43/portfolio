@@ -20,12 +20,16 @@ export function GalaxyIntroCurtain({
   const [isClosing, setIsClosing] = useState(false)
   const [pct, setPct] = useState(0)
   const deferredAt = useRef(0)
+  const loadStateRef = useRef({ floor: 0, deferred3d: false, canvasReady: false })
+  const progressRef = useRef(0)
   const checkGradId = `galaxy-intro-pct-check-${useId().replace(/:/g, '')}`
 
   const floor = useMemo(
     () => milestoneFloor({ chunksWarmed, deferred3d, canvasReady }),
     [chunksWarmed, deferred3d, canvasReady],
   )
+
+  loadStateRef.current = { floor, deferred3d, canvasReady }
 
   useEffect(() => {
     if (deferred3d && !canvasReady && deferredAt.current === 0) {
@@ -36,31 +40,51 @@ export function GalaxyIntroCurtain({
 
   useEffect(() => {
     if (canvasReady) {
+      progressRef.current = 100
       setPct(100)
       return undefined
     }
 
     if (reducedMotion) {
-      setPct((prev) => Math.max(prev, floor))
+      setPct((prev) => {
+        const n = Math.max(prev, floor)
+        progressRef.current = n
+        return n
+      })
       return undefined
     }
 
-    const tick = () => {
-      setPct((prev) => {
-        let target = floor
-        if (deferred3d && !canvasReady && deferredAt.current) {
-          const elapsed = (performance.now() - deferredAt.current) / 1000
-          const creep = Math.min(28, elapsed * 14)
-          target = Math.max(target, Math.min(99, 66 + creep))
-        }
-        if (prev >= target) return prev
+    let raf = 0
+    const stepFrame = () => {
+      const { floor: fl, deferred3d: d3, canvasReady: ready } = loadStateRef.current
+      if (ready) return
+
+      let target = fl
+      if (d3 && !ready && deferredAt.current) {
+        const elapsed = (performance.now() - deferredAt.current) / 1000
+        const creep = Math.min(28, elapsed * 14)
+        target = Math.max(target, Math.min(99, 66 + creep))
+      }
+
+      const prev = progressRef.current
+      let next = prev
+      if (prev < target) {
         const step = Math.max(1, Math.ceil((target - prev) / 1.65))
-        return Math.min(target, prev + step)
-      })
+        next = Math.min(target, prev + step)
+      }
+      progressRef.current = next
+
+      const dispA = Math.min(99, Math.round(prev))
+      const dispB = Math.min(99, Math.round(next))
+      if (dispB !== dispA || next >= 100) {
+        setPct(next >= 100 ? 100 : next)
+      }
+
+      raf = requestAnimationFrame(stepFrame)
     }
 
-    const id = window.setInterval(tick, 36)
-    return () => clearInterval(id)
+    raf = requestAnimationFrame(stepFrame)
+    return () => cancelAnimationFrame(raf)
   }, [floor, canvasReady, deferred3d, reducedMotion])
 
   useEffect(() => {
@@ -98,7 +122,7 @@ export function GalaxyIntroCurtain({
             width={1672}
             height={1431}
             decoding="async"
-            fetchpriority="high"
+            fetchPriority="high"
             loading="eager"
           />
         <div className={`galaxy-intro-curtain__load ${reducedMotion ? 'is-reduced' : ''}`}>

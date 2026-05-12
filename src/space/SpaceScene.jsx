@@ -6,7 +6,7 @@ import {
   recordSceneInteractiveSubtreeReady,
   recordScenePhase,
 } from '../shared/lib/sceneTelemetry'
-import { AdaptiveSceneQualityContext, useAdaptiveSceneQuality } from './adaptiveSceneQuality'
+import { AdaptiveSceneQualityContext, useAdaptiveSceneQuality, useAdaptiveSceneQualityContext } from './adaptiveSceneQuality'
 import { createResponsiveSpaceLayout } from './responsiveSpaceLayout'
 import { ProceduralEnvironmentRoot } from './sceneChunks/ProceduralEnvironmentChunk'
 import { HeroShipWake } from './HeroShipWake'
@@ -27,17 +27,17 @@ const DeepSpaceDecorLazy = lazy(() =>
 
 /**
  * Post-FX (Bloom/Vignette) pulls in @react-three/postprocessing + postprocessing (~hundreds of KB parsed).
- * Skip on save-data / reduced motion. Otherwise: first user gesture, or a short idle/timer fallback so
- * bloom appears soon — long delays made the scene look “unlit” until FX kicked in.
+ * Skip on save-data / reduced motion / adaptive `skipPostFx` (2G, save-data, narrow+3G). Otherwise: mount soon.
  */
 function DeferredEffectComposer({ onSettled }) {
+  const q = useAdaptiveSceneQualityContext()
   const [ready, setReady] = useState(false)
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onSettled?.()
       return undefined
     }
-    if (navigator.connection?.saveData) {
+    if (q?.skipPostFx) {
       onSettled?.()
       return undefined
     }
@@ -46,7 +46,7 @@ function DeferredEffectComposer({ onSettled }) {
     onSettled?.()
     const id = requestAnimationFrame(() => setReady(true))
     return () => cancelAnimationFrame(id)
-  }, [onSettled])
+  }, [onSettled, q?.skipPostFx])
   if (!ready) return null
   return (
     <Suspense fallback={null}>
@@ -107,6 +107,8 @@ function SceneDirector({ focus, cameraFov, curtainDismissed, prefersReducedMotio
   const introConsumed = useRef(false)
   const scratchChase = useRef(new THREE.Vector3())
   const scratchLook = useRef(new THREE.Vector3())
+  const idleParkCam = useRef(new THREE.Vector3())
+  const idleParkLook = useRef(new THREE.Vector3())
 
   useEffect(() => {
     camera.fov = cameraFov
@@ -152,8 +154,10 @@ function SceneDirector({ focus, cameraFov, curtainDismissed, prefersReducedMotio
       if (heroShipCameraBridge.valid && !prefersReducedMotion) {
         applyHeroChase(0)
       } else {
-        camera.position.copy(DEFAULT_CAMERA_POS.clone().add(IDLE_HERO_PARK_CAM_OFFSET))
-        currentLookAt.current.copy(DEFAULT_LOOK_AT.clone().add(IDLE_HERO_PARK_LOOK_OFFSET))
+        idleParkCam.current.copy(DEFAULT_CAMERA_POS).add(IDLE_HERO_PARK_CAM_OFFSET)
+        camera.position.copy(idleParkCam.current)
+        idleParkLook.current.copy(DEFAULT_LOOK_AT).add(IDLE_HERO_PARK_LOOK_OFFSET)
+        currentLookAt.current.copy(idleParkLook.current)
         camera.lookAt(currentLookAt.current)
       }
       return
