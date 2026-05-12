@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useAmbientGlowPointer } from './shared/hooks/useAmbientGlowPointer'
+import { usePlanetPanelExclusiveVideoPlayback } from './shared/hooks/usePortfolioPanelVideoPerf'
 import { gsap } from 'gsap'
 import { ExternalLink } from './shared/ui/ExternalLink'
 import { PanelHeader } from './shared/ui/PanelHeader'
@@ -31,6 +32,26 @@ function googleDrivePreviewIframeUrl(fileId) {
   return `https://drive.google.com/file/d/${fileId}/preview`
 }
 
+/** Pause when off-screen — AR screen captures are heavy when two decode concurrently. */
+function DeckHtmlVideo({ title, preload = 'none', src, ...videoProps }) {
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return undefined
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) el.pause()
+      },
+      { threshold: 0.06 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [src])
+
+  return <video ref={videoRef} src={src} playsInline preload={preload} title={title} {...videoProps} />
+}
+
 /** Drive `/preview` iframe lays out its own UI — it cannot be centered with CSS; prefer `<video>` + direct stream. */
 function GoogleDriveProjectVideo({ fileId, title }) {
   const [streamIndex, setStreamIndex] = useState(0)
@@ -51,7 +72,7 @@ function GoogleDriveProjectVideo({ fileId, title }) {
 
   const src = candidates[Math.min(streamIndex, candidates.length - 1)]
   return (
-    <video
+    <DeckHtmlVideo
       key={src}
       src={src}
       title={title}
@@ -59,8 +80,7 @@ function GoogleDriveProjectVideo({ fileId, title }) {
       disablePictureInPicture
       muted
       loop
-      playsInline
-      preload="metadata"
+      preload="none"
       referrerPolicy="no-referrer"
       {...{ 'x-webkit-airplay': 'deny' }}
       onError={() => {
@@ -127,14 +147,13 @@ function ProjectVideo({ src, title }) {
     )
   }
   return (
-    <video
+    <DeckHtmlVideo
       src={src}
       title={title}
       controls
       disablePictureInPicture
       muted
       loop
-      playsInline
       preload="none"
       {...{ 'x-webkit-airplay': 'deny' }}
     />
@@ -461,6 +480,7 @@ function PlanetShowcasePanelComponent({ showcase, onBack }) {
   const [shotLightbox, setShotLightbox] = useState(null)
   const preloadedShotsRef = useRef(new Set())
   const onCardAmbientMove = useAmbientGlowPointer()
+  usePlanetPanelExclusiveVideoPlayback()
 
   const preloadShot = useCallback((viewUrl) => {
     const fullSrc = getGoogleDriveFullImageUrl(viewUrl)

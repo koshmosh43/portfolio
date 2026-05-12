@@ -8,6 +8,9 @@ import {
   TRAIL_POINT_MAX_STEP,
 } from './planetConstants'
 
+const trailWorldScratch = new THREE.Vector3()
+const trailLocalScratch = new THREE.Vector3()
+
 export function createTrailColors(base, highlight, power = 1.6) {
   const colors = new Float32Array(MOON_TRAIL_POINTS * 3)
   for (let i = 0; i < MOON_TRAIL_POINTS; i += 1) {
@@ -63,11 +66,11 @@ export function updateTrailFromObject({
 }) {
   const dupGeomRefs = coreGeomDupRefs ?? []
   if (!sourceRef.current || !parentRef.current || !coreGeomRef.current || !softGeomRef.current) return
-  const worldPos = new THREE.Vector3()
-  const localPos = new THREE.Vector3()
-  sourceRef.current.getWorldPosition(worldPos)
-  localPos.copy(worldPos)
-  parentRef.current.worldToLocal(localPos)
+  sourceRef.current.getWorldPosition(trailWorldScratch)
+  trailLocalScratch.copy(trailWorldScratch)
+  parentRef.current.worldToLocal(trailLocalScratch)
+
+  const localPos = trailLocalScratch
 
   if (!readyRef.current) {
     for (let i = 0; i < MOON_TRAIL_POINTS; i += 1) {

@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { WELCOME_TOTAL_CHARS } from '../welcomeConstants'
 import pilotSticker from '../assets/sticker.webp'
 import { easeOutQuint, HERO_POST_CURTAIN_FLIGHT_S, sampleHeroShipFlight } from './heroFlightPath'
-import { heroShipCameraBridge, pushHeroTrail } from './heroShipCameraBridge'
+import { heroShipCameraBridge, pushHeroTrail, resetHeroTrail } from './heroShipCameraBridge'
 
 function laserHash01(n) {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
@@ -437,6 +437,7 @@ export function Spaceship({
   const wasFocused = useRef(false)
   const isReturning = useRef(false)
   const idleTime = useRef(0)
+  const idleRestScratch = useRef(new THREE.Vector3())
   const savedState = useRef({
     position: new THREE.Vector3(),
     rotationY: 0,
@@ -961,6 +962,7 @@ export function Spaceship({
       savedState.current.scale.copy(group.current.scale)
       isReturning.current = false
     } else if (wasFocused.current && !isFocused) {
+      resetHeroTrail()
       isReturning.current = true
       /* Avoid replaying post-curtain Bézier from off-screen if the planet was opened mid-intro. */
       heroIntroPlayed.current = true
@@ -1031,12 +1033,13 @@ export function Spaceship({
         heroFlightClock0.current = null
         idleTime.current += delta
         const idleT = idleTime.current
-        const idleRest = new THREE.Vector3(
+        const ir = idleRestScratch.current
+        ir.set(
           0.7 + Math.sin(idleT * 0.35) * 0.22,
           -0.25 + shipLift + Math.sin(idleT * 1.5) * 0.08,
           -2,
         )
-        shipTarget.current.lerp(idleRest, 0.08)
+        shipTarget.current.lerp(ir, 0.08)
         group.current.position.copy(shipTarget.current)
         group.current.rotation.z = Math.sin(idleT * 0.9) * 0.05
         group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, 0, 0.08)
@@ -1060,12 +1063,13 @@ export function Spaceship({
           heroIntroPlayed.current = true
           idleTime.current += delta
           const idleT = idleTime.current
-          const idleRest = new THREE.Vector3(
+          const ir = idleRestScratch.current
+          ir.set(
             0.7 + Math.sin(idleT * 0.35) * 0.22,
             -0.25 + shipLift + Math.sin(idleT * 1.5) * 0.08,
             -2,
           )
-          shipTarget.current.lerp(idleRest, 0.08)
+          shipTarget.current.lerp(ir, 0.08)
           group.current.position.copy(shipTarget.current)
           group.current.rotation.z = Math.sin(idleT * 0.9) * 0.05
           group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, 0, 0.08)
@@ -1087,7 +1091,8 @@ export function Spaceship({
         wake = (1 - heroShipCameraBridge.heroFlightEase01) * 0.95
       } else if (isReturning.current) {
         const d = group.current.position.distanceTo(savedState.current.position)
-        wake = Math.min(0.84, d * 3.5)
+        /** Tamer than min(0.84, d*3.5) — less additive fill + trail work during return-to-orbit. */
+        wake = Math.min(0.38, d * 1.12)
       }
       heroShipCameraBridge.wakeStrength = wake
       if (wake > 0.035) pushHeroTrail(heroShipCameraBridge.shipWorld)

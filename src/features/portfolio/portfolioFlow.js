@@ -1,4 +1,4 @@
-import { startTransition, useCallback, useEffect, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { pick } from 'remeda'
 import { CTA_REVEAL_DELAY_MS, HERO_INTRO_HOLD_MS } from '../../welcomeConstants.js'
 
@@ -84,15 +84,11 @@ export function usePortfolioFlow({ prefersReducedMotion, projectsByPlanet }) {
   )
 
   const onPlanetSelect = useCallback((planetId) => {
-    requestAnimationFrame(() => {
-      startTransition(() => dispatch({ type: 'PLANET_SELECTED', planetId }))
-    })
+    dispatch({ type: 'PLANET_SELECTED', planetId })
   }, [])
 
   const onBackToGalaxy = useCallback(() => {
-    requestAnimationFrame(() => {
-      startTransition(() => dispatch({ type: 'BACK_TO_GALAXY' }))
-    })
+    dispatch({ type: 'BACK_TO_GALAXY' })
   }, [])
 
   const view = useMemo(

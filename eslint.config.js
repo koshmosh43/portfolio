@@ -42,4 +42,8 @@ export default [
       'react/no-unknown-property': 'off',
     },
   },
+  {
+    files: ['vite.config.js'],
+    languageOptions: { globals: { ...globals.node } },
+  },
 ]
