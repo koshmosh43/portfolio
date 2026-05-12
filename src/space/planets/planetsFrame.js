@@ -324,49 +324,55 @@ export function runPlanetsFrame({
     m.size = szB + (0.5 + 0.5 * Math.sin(t * szF + szPh)) * szA
   }
 
-  updateTrailFromObject({
-    sourceRef: refs.moon,
-    parentRef: refs.planetBGroup,
-    coreGeomRef: refs.moonDustGeom,
-    softGeomRef: refs.moonDustWideGeom,
-    corePositions: assets.moonTrailPositions,
-    softPositions: assets.moonTrailWidePositions,
-    readyRef: refs.moonTrailReady,
-  })
-  updateTrailFromObject({
-    sourceRef: refs.moonB,
-    parentRef: refs.planetBGroup,
-    coreGeomRef: refs.moonBDustGeom,
-    softGeomRef: refs.moonBDustWideGeom,
-    corePositions: assets.moonBTrailPositions,
-    softPositions: assets.moonBTrailWidePositions,
-    readyRef: refs.moonBTrailReady,
-  })
-  updateTrailFromObject({
-    sourceRef: refs.moonC,
-    parentRef: refs.planetBGroup,
-    coreGeomRef: refs.moonCDustGeom,
-    softGeomRef: refs.moonCDustWideGeom,
-    corePositions: assets.moonCTrailPositions,
-    softPositions: assets.moonCTrailWidePositions,
-    readyRef: refs.moonCTrailReady,
-  })
-  updateTrailFromObject({
-    sourceRef: refs.designMoonA,
-    parentRef: refs.planetEGroup,
-    coreGeomRef: refs.designMoonATrailGeom,
-    softGeomRef: refs.designMoonATrailWideGeom,
-    corePositions: assets.designMoonATrailPositions,
-    softPositions: assets.designMoonATrailWidePositions,
-    readyRef: refs.designMoonATrailReady,
-  })
-  updateTrailFromObject({
-    sourceRef: refs.designMoonB,
-    parentRef: refs.planetEGroup,
-    coreGeomRef: refs.designMoonBTrailGeom,
-    softGeomRef: refs.designMoonBTrailWideGeom,
-    corePositions: assets.designMoonBTrailPositions,
-    softPositions: assets.designMoonBTrailWidePositions,
-    readyRef: refs.designMoonBTrailReady,
-  })
+  /**
+   * During fly-to-focus / focused mode we prioritize camera smoothness over tail updates.
+   * Trails resume immediately after leaving focus.
+   */
+  if (!isFocused) {
+    updateTrailFromObject({
+      sourceRef: refs.moon,
+      parentRef: refs.planetBGroup,
+      coreGeomRef: refs.moonDustGeom,
+      softGeomRef: refs.moonDustWideGeom,
+      corePositions: assets.moonTrailPositions,
+      softPositions: assets.moonTrailWidePositions,
+      readyRef: refs.moonTrailReady,
+    })
+    updateTrailFromObject({
+      sourceRef: refs.moonB,
+      parentRef: refs.planetBGroup,
+      coreGeomRef: refs.moonBDustGeom,
+      softGeomRef: refs.moonBDustWideGeom,
+      corePositions: assets.moonBTrailPositions,
+      softPositions: assets.moonBTrailWidePositions,
+      readyRef: refs.moonBTrailReady,
+    })
+    updateTrailFromObject({
+      sourceRef: refs.moonC,
+      parentRef: refs.planetBGroup,
+      coreGeomRef: refs.moonCDustGeom,
+      softGeomRef: refs.moonCDustWideGeom,
+      corePositions: assets.moonCTrailPositions,
+      softPositions: assets.moonCTrailWidePositions,
+      readyRef: refs.moonCTrailReady,
+    })
+    updateTrailFromObject({
+      sourceRef: refs.designMoonA,
+      parentRef: refs.planetEGroup,
+      coreGeomRef: refs.designMoonATrailGeom,
+      softGeomRef: refs.designMoonATrailWideGeom,
+      corePositions: assets.designMoonATrailPositions,
+      softPositions: assets.designMoonATrailWidePositions,
+      readyRef: refs.designMoonATrailReady,
+    })
+    updateTrailFromObject({
+      sourceRef: refs.designMoonB,
+      parentRef: refs.planetEGroup,
+      coreGeomRef: refs.designMoonBTrailGeom,
+      softGeomRef: refs.designMoonBTrailWideGeom,
+      corePositions: assets.designMoonBTrailPositions,
+      softPositions: assets.designMoonBTrailWidePositions,
+      readyRef: refs.designMoonBTrailReady,
+    })
+  }
 }

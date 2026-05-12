@@ -24,7 +24,9 @@ export default function App() {
   const [welcomeVisibleCount, setWelcomeVisibleCount] = useState(WELCOME_TOTAL_CHARS)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [ctaSunJoke, setCtaSunJoke] = useState(false)
+  const [panelPlanetId, setPanelPlanetId] = useState(null)
   const sunJokeTimerRef = useRef(0)
+  const panelMountTimerRef = useRef(0)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -100,6 +102,7 @@ export default function App() {
   const sunTapEnabled = Boolean(
     portfolio.curtainDismissed && portfolio.heroCtaRevealed && !portfolio.activePlanetId,
   )
+  const backToGalaxy = portfolio.onBackToGalaxy
 
   useEffect(() => {
     if (!portfolio.activePlanetId) return
@@ -113,9 +116,33 @@ export default function App() {
   useEffect(
     () => () => {
       if (sunJokeTimerRef.current) clearTimeout(sunJokeTimerRef.current)
+      if (panelMountTimerRef.current) clearTimeout(panelMountTimerRef.current)
     },
     [],
   )
+
+  useEffect(() => {
+    if (panelMountTimerRef.current) {
+      clearTimeout(panelMountTimerRef.current)
+      panelMountTimerRef.current = 0
+    }
+    if (!portfolio.activePlanetId) {
+      setPanelPlanetId(null)
+      return
+    }
+    const delayMs = prefersReducedMotion ? 0 : 260
+    panelMountTimerRef.current = window.setTimeout(() => {
+      panelMountTimerRef.current = 0
+      setPanelPlanetId(portfolio.activePlanetId)
+    }, delayMs)
+  }, [portfolio.activePlanetId, prefersReducedMotion])
+
+  const onBackToGalaxy = useCallback(() => {
+    setPanelPlanetId(null)
+    requestAnimationFrame(backToGalaxy)
+  }, [backToGalaxy])
+
+  const panelShowcase = panelPlanetId ? portfolioProjects[panelPlanetId] ?? null : null
 
   const sceneLayerReady =
     scene.deferred3d && (portfolio.canvasReady || portfolio.curtainDismissed)
@@ -165,11 +192,11 @@ export default function App() {
           />
         ) : null}
       </div>
-      {portfolio.activeShowcase ? (
+      {panelShowcase ? (
         <Suspense fallback={null}>
           <PortfolioShowcasePanel
-            showcase={portfolio.activeShowcase}
-            onBack={portfolio.onBackToGalaxy}
+            showcase={panelShowcase}
+            onBack={onBackToGalaxy}
           />
         </Suspense>
       ) : null}
