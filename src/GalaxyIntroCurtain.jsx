@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, startTransition } from 'react'
 import bieberPoster from './assets/bieber.webp'
 import { GalaxyIntroBackdrop } from './GalaxyIntroBackdrop'
 import { IntroOrbitSvg } from './IntroOrbitSvg'
@@ -77,7 +77,9 @@ export function GalaxyIntroCurtain({
       const dispA = Math.min(99, Math.round(prev))
       const dispB = Math.min(99, Math.round(next))
       if (dispB !== dispA || next >= 100) {
-        setPct(next >= 100 ? 100 : next)
+        startTransition(() => {
+          setPct(next >= 100 ? 100 : next)
+        })
       }
 
       raf = requestAnimationFrame(stepFrame)

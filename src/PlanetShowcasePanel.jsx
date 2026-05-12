@@ -32,8 +32,13 @@ function googleDrivePreviewIframeUrl(fileId) {
   return `https://drive.google.com/file/d/${fileId}/preview`
 }
 
+/** Static frame for `<video poster>` — Drive MP4 streams often show black until first decode. */
+function googleDriveVideoPosterUrl(fileId) {
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w960`
+}
+
 /** Pause when off-screen — AR screen captures are heavy when two decode concurrently. */
-function DeckHtmlVideo({ title, preload = 'none', src, ...videoProps }) {
+function DeckHtmlVideo({ title, preload = 'none', src, poster, ...videoProps }) {
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -43,13 +48,23 @@ function DeckHtmlVideo({ title, preload = 'none', src, ...videoProps }) {
       ([entry]) => {
         if (!entry?.isIntersecting) el.pause()
       },
-      { threshold: 0.06 },
+      { rootMargin: '48px', threshold: 0.04 },
     )
     io.observe(el)
     return () => io.disconnect()
   }, [src])
 
-  return <video ref={videoRef} src={src} playsInline preload={preload} title={title} {...videoProps} />
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      poster={poster}
+      playsInline
+      preload={preload}
+      title={title}
+      {...videoProps}
+    />
+  )
 }
 
 /** Drive `/preview` iframe lays out its own UI — it cannot be centered with CSS; prefer `<video>` + direct stream. */
@@ -71,16 +86,18 @@ function GoogleDriveProjectVideo({ fileId, title }) {
   }
 
   const src = candidates[Math.min(streamIndex, candidates.length - 1)]
+  const poster = googleDriveVideoPosterUrl(fileId)
   return (
     <DeckHtmlVideo
       key={src}
       src={src}
+      poster={poster}
       title={title}
       controls
       disablePictureInPicture
       muted
       loop
-      preload="none"
+      preload="metadata"
       referrerPolicy="no-referrer"
       {...{ 'x-webkit-airplay': 'deny' }}
       onError={() => {
@@ -129,13 +146,31 @@ function getYoutubeEmbedUrl(url) {
   }
 }
 
-function ProjectVideo({ src, title }) {
+function ProjectVideoPlaceholder({ title, poster }) {
+  return poster ? (
+    <img className="project-video-poster" src={poster} alt="" loading="lazy" decoding="async" />
+  ) : (
+    <div className="project-video-placeholder" aria-hidden>
+      <span>{title}</span>
+    </div>
+  )
+}
+
+function ProjectVideo({ src, title, mediaReady }) {
   const driveFileId = getGoogleDriveFileId(src)
   if (driveFileId) {
+    if (!mediaReady) {
+      return <ProjectVideoPlaceholder title={title} poster={googleDriveVideoPosterUrl(driveFileId)} />
+    }
     return <GoogleDriveProjectVideo fileId={driveFileId} title={title} />
   }
   const youtubeEmbedUrl = getYoutubeEmbedUrl(src)
   if (youtubeEmbedUrl) {
+    if (!mediaReady) {
+      const videoId = youtubeEmbedUrl.match(/\/embed\/([^?]+)/)?.[1]
+      const poster = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null
+      return <ProjectVideoPlaceholder title={title} poster={poster} />
+    }
     return (
       <iframe
         className="project-video-embed"
@@ -146,6 +181,7 @@ function ProjectVideo({ src, title }) {
       />
     )
   }
+  if (!mediaReady) return <ProjectVideoPlaceholder title={title} poster={null} />
   return (
     <DeckHtmlVideo
       src={src}
@@ -475,12 +511,33 @@ function ArShotLightbox({ lightbox, onClosed }) {
   )
 }
 
-function PlanetShowcasePanelComponent({ showcase, onBack }) {
+function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false }) {
   const gridRef = useRef(null)
   const [shotLightbox, setShotLightbox] = useState(null)
+  const [mediaReady, setMediaReady] = useState(false)
   const preloadedShotsRef = useRef(new Set())
   const onCardAmbientMove = useAmbientGlowPointer()
   usePlanetPanelExclusiveVideoPlayback()
+
+  useEffect(() => {
+    if (!enableMedia) {
+      setMediaReady(false)
+      return undefined
+    }
+    let idleId = 0
+    let timeoutId = 0
+    const arm = () => {
+      requestAnimationFrame(() => {
+        setMediaReady(true)
+      })
+    }
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(arm, { timeout: 800 })
+      return () => window.cancelIdleCallback(idleId)
+    }
+    timeoutId = window.setTimeout(arm, 120)
+    return () => window.clearTimeout(timeoutId)
+  }, [enableMedia, showcase])
 
   const preloadShot = useCallback((viewUrl) => {
     const fullSrc = getGoogleDriveFullImageUrl(viewUrl)
@@ -586,7 +643,7 @@ function PlanetShowcasePanelComponent({ showcase, onBack }) {
                   <div
                     className="project-card-preview project-card-preview--ar"
                   >
-                    <ProjectVideo src={project.videoUrl} title={project.title} />
+                    <ProjectVideo src={project.videoUrl} title={project.title} mediaReady={mediaReady} />
                   </div>
                   <div
                     className={`project-card-screenshots${shotCount === 2 ? ' project-card-screenshots--pair' : ''}`}
@@ -622,7 +679,7 @@ function PlanetShowcasePanelComponent({ showcase, onBack }) {
                 </div>
               ) : (
                 <div className="project-card-preview">
-                  <ProjectVideo src={project.videoUrl} title={project.title} />
+                  <ProjectVideo src={project.videoUrl} title={project.title} mediaReady={mediaReady} />
                 </div>
               )}
               <h4>{project.title}</h4>

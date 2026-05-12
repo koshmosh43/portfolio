@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import { GalaxyIntroCurtain } from './GalaxyIntroCurtain'
 import { WelcomeHero } from './WelcomeHero'
 import { usePortfolioFlow } from './features/portfolio/portfolioFlow'
@@ -25,8 +25,10 @@ export default function App() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [ctaSunJoke, setCtaSunJoke] = useState(false)
   const [panelPlanetId, setPanelPlanetId] = useState(null)
+  const [panelMediaPlanetId, setPanelMediaPlanetId] = useState(null)
   const sunJokeTimerRef = useRef(0)
   const panelMountTimerRef = useRef(0)
+  const panelMediaTimerRef = useRef(0)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -92,10 +94,14 @@ export default function App() {
   const onSunTap = useCallback(() => {
     if (!portfolio.heroCtaRevealed || portfolio.activePlanetId) return
     if (sunJokeTimerRef.current) clearTimeout(sunJokeTimerRef.current)
-    setCtaSunJoke(true)
+    startTransition(() => {
+      setCtaSunJoke(true)
+    })
     sunJokeTimerRef.current = window.setTimeout(() => {
       sunJokeTimerRef.current = 0
-      setCtaSunJoke(false)
+      startTransition(() => {
+        setCtaSunJoke(false)
+      })
     }, SUN_JOKE_DISPLAY_MS)
   }, [portfolio.heroCtaRevealed, portfolio.activePlanetId])
 
@@ -110,13 +116,16 @@ export default function App() {
       clearTimeout(sunJokeTimerRef.current)
       sunJokeTimerRef.current = 0
     }
-    setCtaSunJoke(false)
+    startTransition(() => {
+      setCtaSunJoke(false)
+    })
   }, [portfolio.activePlanetId])
 
   useEffect(
     () => () => {
       if (sunJokeTimerRef.current) clearTimeout(sunJokeTimerRef.current)
       if (panelMountTimerRef.current) clearTimeout(panelMountTimerRef.current)
+      if (panelMediaTimerRef.current) clearTimeout(panelMediaTimerRef.current)
     },
     [],
   )
@@ -126,20 +135,42 @@ export default function App() {
       clearTimeout(panelMountTimerRef.current)
       panelMountTimerRef.current = 0
     }
+    if (panelMediaTimerRef.current) {
+      clearTimeout(panelMediaTimerRef.current)
+      panelMediaTimerRef.current = 0
+    }
     if (!portfolio.activePlanetId) {
       setPanelPlanetId(null)
+      setPanelMediaPlanetId(null)
       return
     }
-    const delayMs = prefersReducedMotion ? 0 : 260
+    const shellDelayMs = prefersReducedMotion ? 0 : 420
+    const mediaDelayMs = prefersReducedMotion ? 0 : 1180
+    setPanelMediaPlanetId(null)
     panelMountTimerRef.current = window.setTimeout(() => {
       panelMountTimerRef.current = 0
       setPanelPlanetId(portfolio.activePlanetId)
-    }, delayMs)
+    }, shellDelayMs)
+    panelMediaTimerRef.current = window.setTimeout(() => {
+      panelMediaTimerRef.current = 0
+      startTransition(() => {
+        setPanelMediaPlanetId(portfolio.activePlanetId)
+      })
+    }, mediaDelayMs)
   }, [portfolio.activePlanetId, prefersReducedMotion])
 
   const onBackToGalaxy = useCallback(() => {
-    setPanelPlanetId(null)
-    requestAnimationFrame(backToGalaxy)
+    requestAnimationFrame(() => {
+      startTransition(() => {
+        setPanelPlanetId(null)
+        setPanelMediaPlanetId(null)
+      })
+      requestAnimationFrame(() => {
+        startTransition(() => {
+          backToGalaxy()
+        })
+      })
+    })
   }, [backToGalaxy])
 
   const panelShowcase = panelPlanetId ? portfolioProjects[panelPlanetId] ?? null : null
@@ -197,6 +228,7 @@ export default function App() {
           <PortfolioShowcasePanel
             showcase={panelShowcase}
             onBack={onBackToGalaxy}
+            enableMedia={panelMediaPlanetId === panelPlanetId}
           />
         </Suspense>
       ) : null}

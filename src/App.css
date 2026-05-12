@@ -835,6 +835,10 @@
   position: relative;
   display: inline-block;
   white-space: pre;
+  will-change: auto;
+}
+
+.welcome-hero--chars-will-change .welcome-hero__char {
   will-change: transform, opacity;
 }
 
@@ -1703,7 +1707,7 @@ h2 {
   justify-content: center;
 }
 
-.project-card-preview--ar :is(video, iframe, .project-video-thumb) {
+.project-card-preview--ar :is(video, iframe, .project-video-thumb, .project-video-poster, .project-video-placeholder) {
   width: min(100%, 320px);
   aspect-ratio: var(--ar-video-w, 9) / var(--ar-video-h, 16);
   background: transparent;
@@ -1715,7 +1719,9 @@ h2 {
 
 .project-card video,
 .project-card iframe,
-.project-video-thumb {
+.project-video-thumb,
+.project-video-poster,
+.project-video-placeholder {
   width: 100%;
   aspect-ratio: 16 / 10;
   border-radius: 10px;
@@ -1725,6 +1731,28 @@ h2 {
 
 .project-card video {
   object-fit: cover;
+}
+
+.project-video-poster {
+  display: block;
+  object-fit: cover;
+}
+
+.project-video-placeholder {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(138deg, rgba(28, 52, 90, 0.68), rgba(11, 21, 38, 0.86)),
+    radial-gradient(circle at 18% 18%, rgba(132, 236, 255, 0.24), transparent 52%);
+  color: rgba(216, 241, 255, 0.75);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Drive `<video>`: poster + faster first play; avoid double-tap zoom delay on mobile. */
+.project-card-preview video {
+  touch-action: manipulation;
 }
 
 .project-card--ar-mask {

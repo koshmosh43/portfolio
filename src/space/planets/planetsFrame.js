@@ -9,6 +9,8 @@ import {
 import { lerpPlanetGroup, wrapTextureScroll } from './planetLayout'
 import { updateTrailFromObject } from './planetTrails'
 
+const moonTrailReentry = { wasFocused: false, cooldown: 0 }
+
 const saasRingSpinScratch = {
   euler: new THREE.Euler(),
   qBase: new THREE.Quaternion(),
@@ -216,6 +218,19 @@ export function runPlanetsFrame({
   if (!refs.root.current) return
   const isFocused = Boolean(activePlanetId)
 
+  if (isFocused) {
+    moonTrailReentry.wasFocused = true
+  } else if (moonTrailReentry.wasFocused) {
+    moonTrailReentry.cooldown = 20
+    moonTrailReentry.wasFocused = false
+  } else if (moonTrailReentry.cooldown > 0) {
+    moonTrailReentry.cooldown -= 1
+  }
+
+  const trailRelaxStepMul =
+    !isFocused && moonTrailReentry.cooldown > 0 ? 1 + 2.6 * (moonTrailReentry.cooldown / 20) : 1
+  const shellDyMul = !isFocused && moonTrailReentry.cooldown > 9 ? 0.68 : 1
+
   refs.root.current.rotation.y = isFocused ? Math.sin(t * 0.03) * 0.03 : Math.sin(t * 0.05) * 0.055
 
   const planetTargets = layout.planets
@@ -269,7 +284,7 @@ export function runPlanetsFrame({
   for (const def of defs.planetDShellFrameDefs) {
     const shell = def.ref.current
     if (!shell) continue
-    shell.rotation.y += def.dy
+    shell.rotation.y += def.dy * shellDyMul
     shell.rotation.x = Math.sin(t * def.xF + def.xPh) * def.xAmp
     shell.rotation.z = Math.sin(t * def.zF + def.zPh) * def.zAmp
     const ox = def.scroll(t)
@@ -337,6 +352,7 @@ export function runPlanetsFrame({
       corePositions: assets.moonTrailPositions,
       softPositions: assets.moonTrailWidePositions,
       readyRef: refs.moonTrailReady,
+      trailRelaxStepMul,
     })
     updateTrailFromObject({
       sourceRef: refs.moonB,
@@ -346,6 +362,7 @@ export function runPlanetsFrame({
       corePositions: assets.moonBTrailPositions,
       softPositions: assets.moonBTrailWidePositions,
       readyRef: refs.moonBTrailReady,
+      trailRelaxStepMul,
     })
     updateTrailFromObject({
       sourceRef: refs.moonC,
@@ -355,6 +372,7 @@ export function runPlanetsFrame({
       corePositions: assets.moonCTrailPositions,
       softPositions: assets.moonCTrailWidePositions,
       readyRef: refs.moonCTrailReady,
+      trailRelaxStepMul,
     })
     updateTrailFromObject({
       sourceRef: refs.designMoonA,
@@ -364,6 +382,7 @@ export function runPlanetsFrame({
       corePositions: assets.designMoonATrailPositions,
       softPositions: assets.designMoonATrailWidePositions,
       readyRef: refs.designMoonATrailReady,
+      trailRelaxStepMul,
     })
     updateTrailFromObject({
       sourceRef: refs.designMoonB,
@@ -373,6 +392,7 @@ export function runPlanetsFrame({
       corePositions: assets.designMoonBTrailPositions,
       softPositions: assets.designMoonBTrailWidePositions,
       readyRef: refs.designMoonBTrailReady,
+      trailRelaxStepMul,
     })
   }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react'
+import { startTransition, useCallback, useEffect, useMemo, useReducer } from 'react'
 import { pick } from 'remeda'
 import { CTA_REVEAL_DELAY_MS, HERO_INTRO_HOLD_MS } from '../../welcomeConstants.js'
 
@@ -61,6 +61,16 @@ function selectPortfolioView(state, projectsByPlanet) {
   }
 }
 
+function scheduleInteractionNav(run) {
+  if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(() => {
+      startTransition(run)
+    })
+  } else {
+    startTransition(run)
+  }
+}
+
 export function usePortfolioFlow({ prefersReducedMotion, projectsByPlanet }) {
   const [state, dispatch] = useReducer(portfolioTransition, portfolioInitialState)
 
@@ -84,7 +94,9 @@ export function usePortfolioFlow({ prefersReducedMotion, projectsByPlanet }) {
   )
 
   const onPlanetSelect = useCallback((planetId) => {
-    dispatch({ type: 'PLANET_SELECTED', planetId })
+    scheduleInteractionNav(() => {
+      dispatch({ type: 'PLANET_SELECTED', planetId })
+    })
   }, [])
 
   const onBackToGalaxy = useCallback(() => {

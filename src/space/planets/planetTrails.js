@@ -63,7 +63,8 @@ export function updateTrailFromObject({
   softPositions,
   readyRef,
   coreGeomDupRefs,
-}) {
+  trailRelaxStepMul = 1,
+} = {}) {
   const dupGeomRefs = coreGeomDupRefs ?? []
   if (!sourceRef.current || !parentRef.current || !coreGeomRef.current || !softGeomRef.current) return
   sourceRef.current.getWorldPosition(trailWorldScratch)
@@ -90,9 +91,10 @@ export function updateTrailFromObject({
     const dy = localPos.y - prevY
     const dz = localPos.z - prevZ
     const distance = Math.hypot(dx, dy, dz)
+    const effStep = TRAIL_POINT_MAX_STEP * trailRelaxStepMul
     const substeps = Math.min(
       TRAIL_MAX_SUBSTEPS,
-      Math.max(1, Math.ceil(distance / TRAIL_POINT_MAX_STEP)),
+      Math.max(1, Math.ceil(distance / effStep)),
     )
     const shift = substeps * 3
 

@@ -115,7 +115,7 @@ function SceneDirector({ focus, cameraFov, curtainDismissed, prefersReducedMotio
     camera.updateProjectionMatrix()
   }, [camera, cameraFov])
 
-  /** Runs after Spaceship (priority) so `heroShipCameraBridge` is current for this frame. */
+  /** Runs after Spaceship (lower `useFrame` priority runs first in R3F). */
   useFrame(() => {
     const targetPos = focus?.cameraPos ?? DEFAULT_CAMERA_POS
     const targetLookAt = focus?.lookAt ?? DEFAULT_LOOK_AT
@@ -230,18 +230,32 @@ function SpaceSceneImpl({
   const { dpr, shadowMap, proceduralTex, viewport } = q
   const layout = useMemo(() => createResponsiveSpaceLayout(viewport), [viewport])
 
+  const focusVecScratch = useRef({
+    lookAt: new THREE.Vector3(),
+    cameraPos: new THREE.Vector3(),
+    shipPos: new THREE.Vector3(),
+    waypoint: new THREE.Vector3(),
+  })
+
   const focus = useMemo(() => {
     const target = layout.focus[activePlanetId]
     if (!target) return null
+    const v = focusVecScratch.current
+    v.lookAt.fromArray(target.lookAt)
+    v.cameraPos.fromArray(target.cameraPos)
+    v.shipPos.fromArray(target.shipPos)
     const next = {
       ...target,
       planetId: activePlanetId,
-      lookAt: new THREE.Vector3(...target.lookAt),
-      cameraPos: new THREE.Vector3(...target.cameraPos),
-      shipPos: new THREE.Vector3(...target.shipPos),
+      lookAt: v.lookAt,
+      cameraPos: v.cameraPos,
+      shipPos: v.shipPos,
     }
     if (target.shipWaypoint) {
-      next.shipWaypoint = new THREE.Vector3(...target.shipWaypoint)
+      v.waypoint.fromArray(target.shipWaypoint)
+      next.shipWaypoint = v.waypoint
+    } else {
+      delete next.shipWaypoint
     }
     return next
   }, [activePlanetId, layout])

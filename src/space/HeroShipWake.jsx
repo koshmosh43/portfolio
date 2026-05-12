@@ -81,10 +81,6 @@ export function HeroShipWake() {
   const geomRef = useRef()
   const matRef = useRef()
   const tex = useMemo(() => makeWakeDotTexture(), [])
-  const posScratch = useRef(new Float32Array(HERO_TRAIL_LEN * 3))
-  const colScratch = useRef(new Float32Array(HERO_TRAIL_LEN * 3))
-  const sizeScratch = useRef(new Float32Array(HERO_TRAIL_LEN))
-  const ageScratch = useRef(new Float32Array(HERO_TRAIL_LEN))
 
   const geom = useMemo(() => {
     const g = new THREE.BufferGeometry()
@@ -139,37 +135,37 @@ export function HeroShipWake() {
     const N = HERO_TRAIL_LEN
     const head = heroShipCameraBridge.trailHead
     const n = heroShipCameraBridge.trailFilled
-    const pos = posScratch.current
-    const col = colScratch.current
-    const size = sizeScratch.current
-    const ageAttr = ageScratch.current
+    const posAttr = g.attributes.position
+    const colAttr = g.attributes.color
+    const sizeAttr = g.attributes.size
+    const ageA = g.attributes.age
+    const posArr = posAttr.array
+    const colArr = colAttr.array
+    const sizeArr = sizeAttr.array
+    const ageArr = ageA.array
 
     for (let k = 0; k < n; k += 1) {
       const ti = (head - n + k + N) % N
       const p = heroShipCameraBridge.trail[ti]
       const i3 = k * 3
-      pos[i3] = p.x
-      pos[i3 + 1] = p.y
-      pos[i3 + 2] = p.z
+      posArr[i3] = p.x
+      posArr[i3 + 1] = p.y
+      posArr[i3 + 2] = p.z
 
       const age = k / Math.max(1, n - 1)
       const tw = (0.24 + 0.76 * age) * w
-      col[i3] = (0.68 + 0.24 * age) * tw
-      col[i3 + 1] = (0.72 + 0.18 * age) * tw
-      col[i3 + 2] = (0.94 - 0.34 * age) * tw
+      colArr[i3] = (0.68 + 0.24 * age) * tw
+      colArr[i3 + 1] = (0.72 + 0.18 * age) * tw
+      colArr[i3 + 2] = (0.94 - 0.34 * age) * tw
 
-      size[k] = THREE.MathUtils.lerp(148, 22, age) * w
-      ageAttr[k] = age
+      sizeArr[k] = THREE.MathUtils.lerp(148, 22, age) * w
+      ageArr[k] = age
     }
 
-    g.attributes.position.array.set(pos.subarray(0, n * 3))
-    g.attributes.color.array.set(col.subarray(0, n * 3))
-    g.attributes.size.array.set(size.subarray(0, n))
-    g.attributes.age.array.set(ageAttr.subarray(0, n))
-    g.attributes.position.needsUpdate = true
-    g.attributes.color.needsUpdate = true
-    g.attributes.size.needsUpdate = true
-    g.attributes.age.needsUpdate = true
+    posAttr.needsUpdate = true
+    colAttr.needsUpdate = true
+    sizeAttr.needsUpdate = true
+    ageA.needsUpdate = true
     g.setDrawRange(0, n)
   })
 

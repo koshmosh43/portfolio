@@ -435,6 +435,7 @@ export function Spaceship({
   const shipTarget = useRef(new THREE.Vector3())
   const shipScaleTarget = useRef(new THREE.Vector3(1, 1, 1))
   const wasFocused = useRef(false)
+  const transitionFxFrames = useRef(0)
   const isReturning = useRef(false)
   const idleTime = useRef(0)
   const idleRestScratch = useRef(new THREE.Vector3())
@@ -956,12 +957,14 @@ export function Spaceship({
     }
 
     if (!wasFocused.current && isFocused) {
+      transitionFxFrames.current = 10
       savedState.current.position.copy(group.current.position)
       savedState.current.rotationY = group.current.rotation.y
       savedState.current.rotationZ = group.current.rotation.z
       savedState.current.scale.copy(group.current.scale)
       isReturning.current = false
     } else if (wasFocused.current && !isFocused) {
+      transitionFxFrames.current = 14
       resetHeroTrail()
       isReturning.current = true
       /* Avoid replaying post-curtain Bézier from off-screen if the planet was opened mid-intro. */
@@ -977,7 +980,7 @@ export function Spaceship({
       if (focus.shipWaypoint) {
         waypoint.copy(focus.shipWaypoint)
         waypoint.y += liftY
-        if (shipTarget.current.distanceTo(waypoint) > 0.28) aim = waypoint
+        if (shipTarget.current.distanceToSquared(waypoint) > 0.0784) aim = waypoint
       }
       shipTarget.current.lerp(aim, 0.052)
       group.current.position.copy(shipTarget.current)
@@ -1080,7 +1083,7 @@ export function Spaceship({
       shipScaleTarget.current.setScalar(1)
     }
     group.current.scale.lerp(shipScaleTarget.current, 0.08)
-    wasFocused.current = isFocused
+    const liteShipFx = transitionFxFrames.current > 0 || isReturning.current
 
     if (!isFocused && group.current) {
       group.current.getWorldPosition(heroShipCameraBridge.shipWorld)
@@ -1090,7 +1093,7 @@ export function Spaceship({
       if (curtainDismissed && !prefersReducedMotion && heroShipCameraBridge.heroFlightEase01 < 0.992) {
         wake = (1 - heroShipCameraBridge.heroFlightEase01) * 0.95
       } else if (isReturning.current) {
-        const d = group.current.position.distanceTo(savedState.current.position)
+        const d = Math.sqrt(group.current.position.distanceToSquared(savedState.current.position))
         /** Tamer than min(0.84, d*3.5) — less additive fill + trail work during return-to-orbit. */
         wake = Math.min(0.38, d * 1.12)
       }
@@ -1112,7 +1115,7 @@ export function Spaceship({
       stickerRef.current.scale.lerp(stickerWorldScratch.targetScale.set(s, s, 1), 0.1)
 
       stickerWorldScratch.targetPos.set(0, STICKER_BASE_Y, STICKER_Z + oz)
-      if (isFocused && group.current && (ox !== 0 || oy !== 0)) {
+      if (!liteShipFx && isFocused && group.current && (ox !== 0 || oy !== 0)) {
         group.current.getWorldPosition(stickerWorldScratch.shipWorld)
 
         stickerWorldScratch.camRightWorld.set(1, 0, 0).applyQuaternion(camera.quaternion)
@@ -1158,55 +1161,57 @@ export function Spaceship({
     */
     const glassGlowAttenTarget = THREE.MathUtils.lerp(0.9, 1.03, THREE.MathUtils.clamp(glowAtten, 0, 0.4) / 0.4)
 
-    /*
-      Laser flicker: left = dense unstable beam; right = calmer, and strong flicker on the two sides
-      never peaks in the same time slice (alternating windows).
-    */
-    const flickerCycle = (t * 0.58) % 1
-    const leftOwnsDrama = flickerCycle < 0.62
-
     let leftMul = 1
-    leftMul *= 0.9 + 0.2 * Math.sin(t * 41.3 + Math.sin(t * 3.15) * 3.2)
-    leftMul *= 0.93 + 0.15 * Math.sin(t * 18.9) * Math.sin(t * 6.95)
-    leftMul *= 0.86 + 0.32 * laserNoise1(t * 5.6, 11)
-    leftMul *= 0.92 + 0.14 * Math.sin(t * 63.2) * Math.sin(t * 29.1)
-    if (leftOwnsDrama) {
-      leftMul *= 0.74 + 0.32 * laserNoise1(t * 11.4, 7)
-      if (laserHash01(Math.floor(t * 3.45) + 2) > 0.86) {
-        const w = (t * 3.45) % 1
-        const dip = Math.max(0, Math.sin(w * Math.PI))
-        leftMul *= 0.06 + 0.94 * dip
-      }
-      if (laserHash01(Math.floor(t * 2.8) + 5) > 0.93) {
-        const w = (t * 2.8) % 1
-        if (w < 0.11) leftMul *= 1.05 + 0.22 * Math.sin((w / 0.11) * Math.PI)
-      }
-    } else {
-      leftMul *= 0.96 + 0.08 * laserNoise1(t * 3.2, 21)
-    }
-
     let rightMul = 1
-    if (leftOwnsDrama) {
-      const sp = 0.5 + 0.5 * Math.sin(t * 1.25 + 0.75 + slowPhaseShift)
-      rightMul *= 0.97 + 0.05 * sp
-      rightMul *= 0.985 + 0.015 * Math.sin(t * 8.2)
-    } else {
-      rightMul *= 0.92 + 0.16 * Math.sin(t * 36.8 + 1.1)
-      rightMul *= 0.88 + 0.28 * laserNoise1(t * 4.35, 13)
-      rightMul *= 0.94 + 0.12 * Math.sin(t * 22.4) * Math.sin(t * 9.1)
-      if (laserHash01(Math.floor(t * 2.05) + 99) > 0.9) {
-        const w = (t * 2.05) % 1
-        const dip = Math.max(0, Math.sin(w * Math.PI))
-        rightMul *= 0.12 + 0.88 * dip
-      }
-      if (laserHash01(Math.floor(t * 1.55) + 40) > 0.94) {
-        const w = (t * 1.55) % 1
-        if (w < 0.09) rightMul *= 1.04 + 0.14 * Math.sin((w / 0.09) * Math.PI)
-      }
-    }
+    if (!liteShipFx) {
+      /*
+        Laser flicker: left = dense unstable beam; right = calmer, and strong flicker on the two sides
+        never peaks in the same time slice (alternating windows).
+      */
+      const flickerCycle = (t * 0.58) % 1
+      const leftOwnsDrama = flickerCycle < 0.62
 
-    leftMul = THREE.MathUtils.clamp(leftMul, 0.05, 1.34)
-    rightMul = THREE.MathUtils.clamp(rightMul, 0.1, 1.26)
+      leftMul *= 0.9 + 0.2 * Math.sin(t * 41.3 + Math.sin(t * 3.15) * 3.2)
+      leftMul *= 0.93 + 0.15 * Math.sin(t * 18.9) * Math.sin(t * 6.95)
+      leftMul *= 0.86 + 0.32 * laserNoise1(t * 5.6, 11)
+      leftMul *= 0.92 + 0.14 * Math.sin(t * 63.2) * Math.sin(t * 29.1)
+      if (leftOwnsDrama) {
+        leftMul *= 0.74 + 0.32 * laserNoise1(t * 11.4, 7)
+        if (laserHash01(Math.floor(t * 3.45) + 2) > 0.86) {
+          const w = (t * 3.45) % 1
+          const dip = Math.max(0, Math.sin(w * Math.PI))
+          leftMul *= 0.06 + 0.94 * dip
+        }
+        if (laserHash01(Math.floor(t * 2.8) + 5) > 0.93) {
+          const w = (t * 2.8) % 1
+          if (w < 0.11) leftMul *= 1.05 + 0.22 * Math.sin((w / 0.11) * Math.PI)
+        }
+      } else {
+        leftMul *= 0.96 + 0.08 * laserNoise1(t * 3.2, 21)
+      }
+
+      if (leftOwnsDrama) {
+        const sp = 0.5 + 0.5 * Math.sin(t * 1.25 + 0.75 + slowPhaseShift)
+        rightMul *= 0.97 + 0.05 * sp
+        rightMul *= 0.985 + 0.015 * Math.sin(t * 8.2)
+      } else {
+        rightMul *= 0.92 + 0.16 * Math.sin(t * 36.8 + 1.1)
+        rightMul *= 0.88 + 0.28 * laserNoise1(t * 4.35, 13)
+        rightMul *= 0.94 + 0.12 * Math.sin(t * 22.4) * Math.sin(t * 9.1)
+        if (laserHash01(Math.floor(t * 2.05) + 99) > 0.9) {
+          const w = (t * 2.05) % 1
+          const dip = Math.max(0, Math.sin(w * Math.PI))
+          rightMul *= 0.12 + 0.88 * dip
+        }
+        if (laserHash01(Math.floor(t * 1.55) + 40) > 0.94) {
+          const w = (t * 1.55) % 1
+          if (w < 0.09) rightMul *= 1.04 + 0.14 * Math.sin((w / 0.09) * Math.PI)
+        }
+      }
+
+      leftMul = THREE.MathUtils.clamp(leftMul, 0.05, 1.34)
+      rightMul = THREE.MathUtils.clamp(rightMul, 0.1, 1.26)
+    }
 
     const planeBase = [0.14, 0.11, 0.11]
 
@@ -1241,7 +1246,8 @@ export function Spaceship({
       }
     }
 
-    const rainbowBase = (t * HULL_LAMP_RAINBOW_SPEED) % 1
+    if (!liteShipFx) {
+      const rainbowBase = (t * HULL_LAMP_RAINBOW_SPEED) % 1
     HULL_MAGIC_LAMP_LAYOUT.forEach((lamp, i) => {
       const refs = hullLampRefs.current[i]
       const shimmer =
@@ -1305,9 +1311,10 @@ export function Spaceship({
         refs.light.intensity = THREE.MathUtils.clamp(0.22 + pulse * 0.34, 0.14, 0.58)
       }
     })
+    }
 
     const rimScratch = glassRimWorldScratch
-    if (glassRimLight.current && group.current) {
+    if (!liteShipFx && glassRimLight.current && group.current) {
       group.current.getWorldPosition(rimScratch.shipWorld)
       camera.getWorldPosition(rimScratch.camWorld)
       rimScratch.toCam.subVectors(rimScratch.camWorld, rimScratch.shipWorld)
@@ -1328,7 +1335,10 @@ export function Spaceship({
       const target = base * glassGlowAttenTarget * neonLightMul * glassLightMul
       glassRimLight.current.intensity = THREE.MathUtils.lerp(glassRimLight.current.intensity, target, 0.075)
     }
-  })
+
+    if (transitionFxFrames.current > 0) transitionFxFrames.current -= 1
+    wasFocused.current = isFocused
+  }, -20)
 
   return (
     <group ref={group} position={shipSpawn}>

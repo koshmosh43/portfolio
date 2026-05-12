@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { memo, useEffect, useLayoutEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   HERO_CTA,
   HERO_GLOW_MS,
@@ -83,6 +83,10 @@ export const WelcomeHero = memo(function WelcomeHero({
   const prevVisibleRef = useRef(isVisible)
   const prevJokeRef = useRef(ctaSunJoke)
 
+  const [charsWillChange, setCharsWillChange] = useState(false)
+  const armChars = useCallback(() => setCharsWillChange(true), [])
+  const relaxChars = useCallback(() => setCharsWillChange(false), [])
+
   useEffect(() => {
     onVisibleCountChange?.(WELCOME_TOTAL_CHARS)
   }, [onVisibleCountChange])
@@ -100,6 +104,7 @@ export const WelcomeHero = memo(function WelcomeHero({
 
     if (reduced) {
       tlRef.current?.kill()
+      relaxChars()
       finish()
       return () => tlRef.current?.kill()
     }
@@ -109,6 +114,7 @@ export const WelcomeHero = memo(function WelcomeHero({
 
     if (!introRevealed) {
       tlRef.current?.kill()
+      relaxChars()
       gsap.set(ctaChars, { opacity: 0, scale: 0.7, y: 6, rotation: 0 })
       gsap.set(introChars, { opacity: 1, scale: 1, y: 0, rotation: 0 })
       finish()
@@ -121,7 +127,12 @@ export const WelcomeHero = memo(function WelcomeHero({
       tlRef.current?.kill()
       gsap.set(ctaChars, { opacity: 0, scale: 0.7, y: 6, rotation: 0 })
       tlRef.current = gsap
-        .timeline({ defaults: { force3D: true } })
+        .timeline({
+          defaults: { force3D: true },
+          onStart: armChars,
+          onComplete: relaxChars,
+          onInterrupt: relaxChars,
+        })
         .to(introChars, {
           duration: 0.2,
           scale: 0.7,
@@ -157,20 +168,32 @@ export const WelcomeHero = memo(function WelcomeHero({
 
     if (wasVisible && !isVisible) {
       tlRef.current?.kill()
-      tlRef.current = gsap.timeline({ defaults: { force3D: true } }).to(ctaChars, {
-        duration: 0.22,
-        scale: 0.65,
-        y: 8,
-        rotation: 360,
-        opacity: 0,
-        ease: 'power2.in',
-        stagger: { amount: 0.48, from: 'center' },
-      })
+      tlRef.current = gsap
+        .timeline({
+          defaults: { force3D: true },
+          onStart: armChars,
+          onComplete: relaxChars,
+          onInterrupt: relaxChars,
+        })
+        .to(ctaChars, {
+          duration: 0.22,
+          scale: 0.65,
+          y: 8,
+          rotation: 360,
+          opacity: 0,
+          ease: 'power2.in',
+          stagger: { amount: 0.48, from: 'center' },
+        })
     } else if (!wasVisible && isVisible) {
       tlRef.current?.kill()
       gsap.set(ctaChars, { opacity: 0, scale: 0.7, y: 6, rotation: 0 })
       tlRef.current = gsap
-        .timeline({ defaults: { force3D: true } })
+        .timeline({
+          defaults: { force3D: true },
+          onStart: armChars,
+          onComplete: relaxChars,
+          onInterrupt: relaxChars,
+        })
         .to(ctaChars, {
           duration: 0.4,
           opacity: 1,
@@ -188,7 +211,7 @@ export const WelcomeHero = memo(function WelcomeHero({
 
     finish()
     return () => tlRef.current?.kill()
-  }, [introRevealed, isVisible, reduced])
+  }, [introRevealed, isVisible, reduced, armChars, relaxChars])
 
   useLayoutEffect(() => {
     if (reduced || !introRevealed) {
@@ -212,9 +235,12 @@ export const WelcomeHero = memo(function WelcomeHero({
         duration: 0.42,
         ease: 'power3.out',
         stagger: { amount: 0.52, from: 'center' },
+        onStart: armChars,
+        onComplete: relaxChars,
+        onInterrupt: relaxChars,
       },
     )
-  }, [ctaSunJoke, introRevealed, reduced])
+  }, [ctaSunJoke, introRevealed, reduced, armChars, relaxChars])
 
   const ctaCopy = ctaSunJoke ? HERO_SUN_JOKE : HERO_CTA
   const phasesClass = ['welcome-hero__phases', introRevealed && 'welcome-hero__phases--cta-mode']
@@ -228,6 +254,7 @@ export const WelcomeHero = memo(function WelcomeHero({
         reduced ? 'welcome-hero--reduced' : '',
         !isVisible && 'welcome-hero--input-off',
         introRevealed && ctaSunJoke && 'welcome-hero--cta-sun-joke',
+        charsWillChange && 'welcome-hero--chars-will-change',
       ]
         .filter(Boolean)
         .join(' ')}
