@@ -175,8 +175,6 @@ function buildMessage({ pageviews, uniques, medianSec, countries, utm }) {
     lines.push(
       '',
       '⚠️ Нульові метрики: найчастіше на проді не було зібраного ключа PostHog.',
-      '→ Repo → Settings → Secrets → додайте VITE_POSTHOG_KEY і зробіть новий деплой Pages.',
-      '→ Карта кліків і карта світу — у веб PostHog (Heatmaps / Maps), не в Telegram.',
     )
   }
 
