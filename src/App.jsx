@@ -5,6 +5,7 @@ import { usePortfolioFlow } from './features/portfolio/portfolioFlow'
 import { useSceneFlow } from './features/spaceScene/sceneFlow'
 import { portfolioProjects } from './shared/config/portfolioProjects'
 import { readNetworkProfile } from './shared/lib/networkProfile'
+import { trackPlanetView, trackSunEasterEgg } from './shared/lib/analytics'
 import { HERO_CTA_MOTION_MS, SUN_JOKE_DISPLAY_MS, WELCOME_TOTAL_CHARS } from './welcomeConstants'
 import './App.css'
 
@@ -118,6 +119,7 @@ export default function App() {
 
   const onSunTap = useCallback(() => {
     if (!portfolio.heroCtaRevealed || portfolio.activePlanetId) return
+    trackSunEasterEgg()
     if (sunJokeTimerRef.current) clearTimeout(sunJokeTimerRef.current)
     startTransition(() => {
       setCtaSunJoke(true)
@@ -146,6 +148,8 @@ export default function App() {
 
   useEffect(() => {
     if (!portfolio.activePlanetId) return
+    const showcase = portfolioProjects[portfolio.activePlanetId]
+    if (showcase) trackPlanetView(portfolio.activePlanetId, showcase.title)
     if (sunJokeTimerRef.current) {
       clearTimeout(sunJokeTimerRef.current)
       sunJokeTimerRef.current = 0

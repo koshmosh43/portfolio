@@ -18,6 +18,10 @@ function publicBase() {
 export default defineConfig(({ mode }) => {
   const base = publicBase()
 
+  if (mode === 'production' && process.env.GITHUB_ACTIONS === 'true' && !process.env.VITE_POSTHOG_KEY?.trim()) {
+    console.warn('\n⚠️  VITE_POSTHOG_KEY is empty — deployed site will not send PostHog events. Add GitHub Actions secret.\n')
+  }
+
   return {
     base,
     plugins: [
@@ -70,6 +74,7 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules/@react-three/postprocessing')) return 'r3f-post'
             if (id.includes('node_modules/postprocessing')) return 'postprocessing'
             if (id.includes('node_modules/gsap')) return 'gsap'
+            if (id.includes('node_modules/posthog-js')) return 'posthog'
           },
         },
       },
