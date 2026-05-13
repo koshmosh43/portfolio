@@ -25,5 +25,4 @@ export function initAnalytics() {
 
 const capture = (event, props) => ready && posthog.capture(event, props)
 
-export const trackPlanetView = (planetId, title) => capture('planet_viewed', { planet_id: planetId, planet_title: title })
 export const trackSunEasterEgg = () => capture('sun_easter_egg')

@@ -110,23 +110,6 @@ async function fetchMedianEngagementSeconds() {
   }
 }
 
-async function fetchPlanetViews() {
-  const q = `
-    SELECT properties.planet_title, count() AS c
-    FROM events
-    WHERE event = 'planet_viewed'
-      AND timestamp >= now() - INTERVAL ${DAYS} DAY
-    GROUP BY properties.planet_title
-    ORDER BY c DESC
-    LIMIT 12
-  `
-  const data = await hogql(q)
-  return (data?.results ?? []).map(([title, count]) => ({
-    title: title || '—',
-    count: Math.round(Number(count) || 0),
-  }))
-}
-
 async function fetchTopCountries() {
   const q = `
     SELECT properties.\`$geoip_country_name\` AS country, uniq(distinct_id) AS u
@@ -166,7 +149,7 @@ async function fetchTopUtm() {
   }))
 }
 
-function buildMessage({ pageviews, uniques, medianSec, planets, countries, utm }) {
+function buildMessage({ pageviews, uniques, medianSec, countries, utm }) {
   const lines = [
     `📊 Portfolio — ${DAYS}-day digest`,
     '',
@@ -176,11 +159,6 @@ function buildMessage({ pageviews, uniques, medianSec, planets, countries, utm }
 
   if (medianSec != null) {
     lines.push(`⏱️ Sessions ~median length: ${medianSec}s`)
-  }
-
-  if (planets.length) {
-    lines.push('', '🪐 Planets:')
-    for (const p of planets) lines.push(`  • ${p.title}: ${p.count}`)
   }
 
   if (countries.length) {
@@ -214,16 +192,15 @@ async function sendTelegram(text) {
   if (!res.ok) throw new Error(`Telegram ${res.status}: ${await res.text()}`)
 }
 
-const [pageviews, uniques, medianSec, planets, countries, utm] = await Promise.all([
+const [pageviews, uniques, medianSec, countries, utm] = await Promise.all([
   fetchPageviews(),
   fetchUniqueVisitors(),
   fetchMedianEngagementSeconds(),
-  fetchPlanetViews(),
   fetchTopCountries(),
   fetchTopUtm(),
 ])
 
-const msg = buildMessage({ pageviews, uniques, medianSec, planets, countries, utm })
+const msg = buildMessage({ pageviews, uniques, medianSec, countries, utm })
 console.log(msg)
 await sendTelegram(msg)
 console.log('Digest sent to Telegram ✓')
