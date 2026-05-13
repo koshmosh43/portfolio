@@ -139,7 +139,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
-        portfolioPreviewBrand: 'Room 8 Studio | Zerplaay',
+        portfolioPreviewBrand: 'Room 8 Studio | Zerpaay',
       },
       {
         title: 'Pots-o-Loot',
@@ -189,7 +189,7 @@ export const portfolioProjects = Object.freeze({
         title: 'Egypt Slot Game',
         description: 'Welcome to the mysterious world of ancient Egypt, where pharaohs, pyramids, and riches await!',
         videoUrl: 'https://drive.google.com/file/d/1GOokwaC4xvZ3EqZOJwhcAnTrZG0R2M5u/view?usp=drive_link',
-        portfolioPreviewBrand: 'Room 8 Studio',
+        portfolioPreviewBrand: 'NDA',
       },
     ],
   },
