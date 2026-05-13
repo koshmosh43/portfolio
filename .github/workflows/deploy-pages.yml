@@ -1,5 +1,5 @@
 # Site: https://koshmosh43.github.io/portfolio/
-# Enable once: Repo → Settings → Pages → Build: GitHub Actions (not “Deploy from branch”).
+# Enable once: Repo → Settings → Pages → Build: GitHub Actions (not "Deploy from branch").
 
 name: Deploy to GitHub Pages
 
@@ -21,10 +21,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - run: npm ci
       - run: npm run build
@@ -32,7 +32,7 @@ jobs:
           VITE_BASE_PATH: /portfolio/
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
           VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
@@ -44,4 +44,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
