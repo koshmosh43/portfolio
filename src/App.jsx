@@ -78,17 +78,30 @@ export default function App() {
       void import('./PlanetShowcasePanel')
     }
 
-    window.addEventListener('pointerdown', load, { passive: true, once: true })
+    const scheduleLoad = () => {
+      if (!effectAlive || started || !canIdlePrefetch) return
+      clearTimers()
+      if (typeof requestIdleCallback === 'function') {
+        idleId = requestIdleCallback(load, { timeout: 1800 })
+      } else {
+        timeoutId = window.setTimeout(load, 120)
+      }
+    }
+
+    window.addEventListener('pointerdown', scheduleLoad, { passive: true, once: true })
+    window.addEventListener('keydown', scheduleLoad, { once: true })
     if (canIdlePrefetch) {
       if (typeof requestIdleCallback === 'function') {
-        idleId = requestIdleCallback(load, { timeout: 9000 })
+        idleId = requestIdleCallback(load, { timeout: 12000 })
       } else {
-        timeoutId = window.setTimeout(load, 4000)
+        timeoutId = window.setTimeout(load, 4600)
       }
     }
 
     return () => {
       effectAlive = false
+      window.removeEventListener('pointerdown', scheduleLoad)
+      window.removeEventListener('keydown', scheduleLoad)
       clearTimers()
     }
   }, [scene.chunksWarmed])

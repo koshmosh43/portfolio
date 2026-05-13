@@ -214,7 +214,7 @@ function previewBrandFromHref(href, explicit) {
   try {
     const host = new URL(href).hostname.replace(/^www\./, '')
     if (host.includes('pearfiction.com')) return 'Pear Fiction'
-    if (host.includes('room8studio.com') || host.includes('room8group.com')) return 'Room 8'
+    if (host.includes('room8studio.com') || host.includes('room8group.com')) return 'Room 8 | Zerplaay'
     if (host === 'youtube.com' || host === 'youtu.be' || host === 'm.youtube.com') return 'Gameplay'
     return 'Preview'
   } catch {
@@ -661,7 +661,6 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
   const [shotLightbox, setShotLightbox] = useState(null)
   const [mediaReady, setMediaReady] = useState(false)
   const [carouselNav, setCarouselNav] = useState({
-    touch: false,
     overflow: false,
     canPrev: false,
     canNext: false,
@@ -723,75 +722,18 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
 
   useEffect(() => {
     const grid = gridRef.current
-    if (
-      !grid ||
-      !mediaReady ||
-      !showcase.carousel ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    )
-      return undefined
-
-    let tween = null
-    const touchUiMq =
-      typeof window.matchMedia === 'function'
-        ? window.matchMedia('(hover: none), (pointer: coarse)')
-        : { matches: false, addEventListener: () => {}, removeEventListener: () => {} }
-
-    const startCarousel = () => {
-      if (touchUiMq.matches) {
-        tween?.kill()
-        tween = null
-        return
-      }
-      const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth)
-      if (maxScroll < 24) return
-      tween?.kill()
-      tween = gsap.to(grid, {
-        scrollLeft: maxScroll,
-        duration: Math.max(8, maxScroll / 85),
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-      })
-    }
-
-    startCarousel()
-    const onEnter = () => tween?.pause()
-    const onLeave = () => tween?.resume()
-    grid.addEventListener('pointerenter', onEnter)
-    grid.addEventListener('pointerleave', onLeave)
-    window.addEventListener('resize', startCarousel)
-    touchUiMq.addEventListener('change', startCarousel)
-
-    return () => {
-      window.removeEventListener('resize', startCarousel)
-      touchUiMq.removeEventListener('change', startCarousel)
-      grid.removeEventListener('pointerenter', onEnter)
-      grid.removeEventListener('pointerleave', onLeave)
-      tween?.kill()
-    }
-  }, [mediaReady, showcase])
-
-  useEffect(() => {
-    const grid = gridRef.current
     if (!grid || !showcase.carousel || !mediaReady) {
-      setCarouselNav({ touch: false, overflow: false, canPrev: false, canNext: false })
+      setCarouselNav({ overflow: false, canPrev: false, canNext: false })
       return undefined
     }
-
-    const touchUiMq =
-      typeof window.matchMedia === 'function'
-        ? window.matchMedia('(hover: none), (pointer: coarse)')
-        : { matches: false, addEventListener: () => {}, removeEventListener: () => {} }
 
     const updateNav = () => {
-      const touch = touchUiMq.matches
       const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth)
       const overflow = maxScroll > 8
       const sl = grid.scrollLeft
       const canPrev = overflow && sl > 6
       const canNext = overflow && sl < maxScroll - 6
-      setCarouselNav({ touch, overflow, canPrev, canNext })
+      setCarouselNav({ overflow, canPrev, canNext })
     }
 
     updateNav()
@@ -799,20 +741,22 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
     ro?.observe(grid)
     grid.addEventListener('scroll', updateNav, { passive: true })
     window.addEventListener('resize', updateNav)
-    touchUiMq.addEventListener('change', updateNav)
 
     return () => {
       ro?.disconnect()
       grid.removeEventListener('scroll', updateNav)
       window.removeEventListener('resize', updateNav)
-      touchUiMq.removeEventListener('change', updateNav)
     }
   }, [mediaReady, showcase.carousel, showcase.projects.length])
 
   const scrollCarouselBy = useCallback((dir) => {
     const grid = gridRef.current
     if (!grid) return
-    const step = Math.max(140, Math.round(grid.clientWidth * 0.72))
+    const card = grid.querySelector('.project-card')
+    if (!card) return
+    const style = getComputedStyle(grid)
+    const gap = parseFloat(style.columnGap || style.gap) || 0
+    const step = card.offsetWidth + gap
     grid.scrollBy({ left: dir * step, behavior: 'smooth' })
   }, [])
 
@@ -841,10 +785,10 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
 
   const gridClass = `planet-grid${isArShowcase ? ' planet-grid--ar-showcase' : ''}`.trim()
   const gridAria =
-    showcase.carousel && carouselNav.touch && carouselNav.overflow
-      ? 'Game projects. Swipe horizontally or use side arrows to browse.'
+    showcase.carousel && carouselNav.overflow
+      ? 'Game projects. Use side arrows to browse.'
       : undefined
-  const showCarouselArrows = showcase.carousel && carouselNav.touch && carouselNav.overflow
+  const showCarouselArrows = showcase.carousel && carouselNav.overflow
 
   const projectGrid = (
     <div ref={gridRef} className={gridClass} aria-label={gridAria}>

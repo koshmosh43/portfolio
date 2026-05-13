@@ -14,6 +14,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=rfT8Jhws0WU',
         linkUrl: 'https://www.peachfinance.com/',
         linkLabel: 'peachfinance.com',
+        portfolioPreviewBrand: 'Peach Finance',
       },
     ],
   },
@@ -51,17 +52,20 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=U69VdMqP1OU',
         linkUrl: 'https://www.keydrop.com/',
         linkLabel: 'keydrop.com',
+        portfolioPreviewBrand: 'Keydrop',
       },
       {
         title: 'ESports: GetInPro',
         description: 'Esports platform for competitive play, tournaments, and player experience — web product in the gaming scene.',
         videoUrl: 'https://www.youtube.com/watch?v=CS4fQ7l22Q0',
+        portfolioPreviewBrand: 'GetInPro',
       },
       {
         title: 'Lingio - language-learning app',
         description:
           'Enterprise language-learning SaaS for working professionals: I shipped major parts on SvelteKit with voice recognition for faster speaking practice, role- and industry-specific flows, and gamified lessons aimed at real workplaces.',
         videoUrl: 'https://youtu.be/-vzhZOOu1Xw',
+        portfolioPreviewBrand: 'Lingio',
       },
       {
         title: 'William Hill Casino',
@@ -80,6 +84,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=vY-9pbLzCzE',
         linkUrl: 'https://www.mrgreen.com/',
         linkLabel: 'mrgreen.com',
+        portfolioPreviewBrand: 'Mr Green',
       },
       {
         title: 'MamaMia Bingo Casino',
@@ -88,6 +93,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=COOIWnJuskU',
         linkUrl: 'https://www.askgamblers.com/online-casinos/reviews/mamamia-bingo-casino',
         linkLabel: 'AskGamblers review',
+        portfolioPreviewBrand: 'MamaMia Bingo',
       },
     ],
   },
@@ -125,6 +131,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=dtBFdLOv-XI',
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
+        portfolioPreviewBrand: 'Room 8 Studio | Zerplaay',
       },
       {
         title: 'Fart Jump Space',
@@ -132,6 +139,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
+        portfolioPreviewBrand: 'Room 8 Studio | Zerplaay',
       },
       {
         title: 'Pots-o-Loot',
@@ -140,6 +148,7 @@ export const portfolioProjects = Object.freeze({
         linkUrl: 'https://pearfiction.com/games/pots-o-loot/',
         linkLabel: 'Game details',
         portfolioPreviewSrc: 'https://pearfiction.com/wp-content/uploads/2025/10/00198_pots_o_loot.png',
+        portfolioPreviewBrand: 'Pear Fiction',
       },
       {
         title: '4 Spicy Frenzy',
@@ -148,6 +157,7 @@ export const portfolioProjects = Object.freeze({
         linkUrl: 'https://pearfiction.com/games/4-spicy-frenzy/',
         linkLabel: 'Game details',
         portfolioPreviewSrc: 'https://pearfiction.com/wp-content/uploads/2026/02/00208_4_spicy_frenzy.webp',
+        portfolioPreviewBrand: 'Pear Fiction',
       },
       {
         title: 'Squealin Riches 2',
@@ -156,6 +166,7 @@ export const portfolioProjects = Object.freeze({
         linkUrl: 'https://pearfiction.com/games/squealin-riches-2/',
         linkLabel: 'Game details',
         portfolioPreviewSrc: 'https://pearfiction.com/wp-content/uploads/2025/04/00177_squealin_riches_2.webp',
+        portfolioPreviewBrand: 'Pear Fiction',
       },
       {
         title: 'Bunny Loot',
@@ -164,6 +175,7 @@ export const portfolioProjects = Object.freeze({
         linkUrl: 'https://pearfiction.com/games/bunny-loot/',
         linkLabel: 'Game details',
         portfolioPreviewSrc: 'https://pearfiction.com/wp-content/uploads/2024/11/00181_bunny_loot.webp',
+        portfolioPreviewBrand: 'Pear Fiction',
       },
       {
         title: 'Wild Lava',
@@ -171,11 +183,13 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=YDPTVYz6uhA',
         linkUrl: 'https://slot.day/playtech/wild-lava/',
         linkLabel: 'Game details',
+        portfolioPreviewBrand: 'Playtech',
       },
       {
         title: 'Egypt Slot Game',
         description: 'Welcome to the mysterious world of ancient Egypt, where pharaohs, pyramids, and riches await!',
         videoUrl: 'https://drive.google.com/file/d/1GOokwaC4xvZ3EqZOJwhcAnTrZG0R2M5u/view?usp=drive_link',
+        portfolioPreviewBrand: 'Room 8 Studio',
       },
     ],
   },
