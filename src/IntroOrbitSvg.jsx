@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-/** Masked ring + stroke-dash “draw” — jh3yy-style; accents aligned with intro pen (mint / magenta / blue). */
+/** Masked ring + stroke-dash "draw" — jh3yy-style; 2-colour system (violet #b44bff / teal #0b8577). */
 export function IntroOrbitSvg({ reduced }) {
   const rid = useId().replace(/:/g, '')
   const fid = `intro-${rid}-light`
@@ -30,49 +30,56 @@ export function IntroOrbitSvg({ reduced }) {
           <feColorMatrix type="saturate" values="3.8" />
           <feComposite in="SourceGraphic" operator="over" />
         </filter>
+        {/* ga: teal glow bottom-left */}
         <radialGradient id={ga} cx="0" cy="24" r="24" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#ff6ef7" />
-          <stop offset="1" stopColor="#ff6ef7" stopOpacity="0" />
+          <stop offset="0"   stopColor="#0b8577" />
+          <stop offset="1"   stopColor="#0b8577" stopOpacity="0" />
         </radialGradient>
+        {/* gb: light teal glow bottom-right */}
         <radialGradient id={gb} cx="24" cy="24" r="24" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#c8ffd8" />
-          <stop offset="1" stopColor="#c8ffd8" stopOpacity="0" />
+          <stop offset="0"   stopColor="#5ef0de" />
+          <stop offset="1"   stopColor="#5ef0de" stopOpacity="0" />
         </radialGradient>
+        {/* gc: violet glow top-center */}
         <radialGradient id={gc} cx="12" cy="0" r="12" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#5eadff" />
-          <stop offset="1" stopColor="#5eadff" stopOpacity="0" />
+          <stop offset="0"   stopColor="#b44bff" />
+          <stop offset="1"   stopColor="#b44bff" stopOpacity="0" />
         </radialGradient>
+        {/* gd: light violet center fill */}
         <radialGradient id={gd} cx="12" cy="12" r="12" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#e8fff0" />
-          <stop offset="1" stopColor="#e8fff0" stopOpacity="0" />
+          <stop offset="0"   stopColor="#e4d4ff" />
+          <stop offset="1"   stopColor="#e4d4ff" stopOpacity="0" />
         </radialGradient>
+        {/* ge: dark teal shadow top-left */}
         <radialGradient id={ge} cx="0" cy="0" r="24" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#1c2e22" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#1c2e22" stopOpacity="0" />
+          <stop offset="0"   stopColor="#061210" stopOpacity="0.55" />
+          <stop offset="1"   stopColor="#061210" stopOpacity="0" />
         </radialGradient>
+        {/* gf: light teal → violet top-right */}
         <radialGradient id={gf} cx="24" cy="0" r="20" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#ffc090" />
-          <stop offset="0.45" stopColor="#7ec4ff" />
-          <stop offset="1" stopColor="#7ec4ff" stopOpacity="0" />
+          <stop offset="0"    stopColor="#5ef0de" />
+          <stop offset="0.45" stopColor="#b44bff" />
+          <stop offset="1"    stopColor="#b44bff" stopOpacity="0" />
         </radialGradient>
+        {/* track: teal ↔ violet, fades at ends */}
         <linearGradient id={gTrack} x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#7bc49a" stopOpacity="0" />
-          <stop offset="0.32" stopColor="#e8a070" stopOpacity="0.2" />
-          <stop offset="0.5" stopColor="#8ed4b8" stopOpacity="0.34" />
-          <stop offset="0.68" stopColor="#5eadff" stopOpacity="0.16" />
-          <stop offset="1" stopColor="#7bc49a" stopOpacity="0" />
+          <stop offset="0"    stopColor="#0b8577" stopOpacity="0" />
+          <stop offset="0.32" stopColor="#0b8577" stopOpacity="0.22" />
+          <stop offset="0.5"  stopColor="#b44bff" stopOpacity="0.34" />
+          <stop offset="0.68" stopColor="#b44bff" stopOpacity="0.16" />
+          <stop offset="1"    stopColor="#0b8577" stopOpacity="0" />
         </linearGradient>
-        {/* Arc: ouroboros — long transparent tail/head so color never “closes”; bright mid only */}
+        {/* arc: ouroboros — transparent tail/head, bright teal peak */}
         <linearGradient id={gArc} x1="2.5" y1="21.5" x2="21.5" y2="2.5" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#5eadff" stopOpacity="0" />
-          <stop offset="0.14" stopColor="#5eadff" stopOpacity="0" />
-          <stop offset="0.24" stopColor="#c8ffd8" stopOpacity="0.18" />
-          <stop offset="0.36" stopColor="#5eadff" stopOpacity="0.42" />
-          <stop offset="0.48" stopColor="#ff6ef7" stopOpacity="0.9" />
-          <stop offset="0.58" stopColor="#c8ffd8" stopOpacity="0.55" />
-          <stop offset="0.72" stopColor="#5eadff" stopOpacity="0.22" />
-          <stop offset="0.86" stopColor="#ffb078" stopOpacity="0.06" />
-          <stop offset="1" stopColor="#ff6ef7" stopOpacity="0" />
+          <stop offset="0"    stopColor="#b44bff" stopOpacity="0" />
+          <stop offset="0.14" stopColor="#b44bff" stopOpacity="0" />
+          <stop offset="0.26" stopColor="#5ef0de" stopOpacity="0.18" />
+          <stop offset="0.38" stopColor="#b44bff" stopOpacity="0.44" />
+          <stop offset="0.5"  stopColor="#0b8577" stopOpacity="0.92" />
+          <stop offset="0.6"  stopColor="#5ef0de" stopOpacity="0.52" />
+          <stop offset="0.72" stopColor="#b44bff" stopOpacity="0.2" />
+          <stop offset="0.86" stopColor="#0b8577" stopOpacity="0.05" />
+          <stop offset="1"    stopColor="#b44bff" stopOpacity="0" />
         </linearGradient>
         <mask id={mid}>
           <g>

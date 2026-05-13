@@ -25,8 +25,8 @@
     clamp(0.4rem, calc(2.8vmin + 0.35rem + var(--layout-safe-t)), 3.4rem)
   );
   --layout-panel-inset: clamp(10px, 3vw, 22px);
-  /* Portrait showcase: same perceived panel height on phone + tablet (wide vw no longer grows the sheet). */
-  --planet-panel-portrait-max-h: min(72dvh, 380px);
+  /* Portrait showcase cap: viewport-safe + aspect-ratio-aware (prevents long cards clipping on narrow screens). */
+  --planet-panel-portrait-max-h: min(88dvh, max(400px, calc(100vw * 1.28)));
   --planet-panel-desktop-max-h: min(72dvh, 500px);
   --layout-copyright-b: clamp(
     6px,
@@ -56,6 +56,33 @@
     rgba(38, 58, 102, 0.48) 72%,
     rgba(4, 8, 22, 0.78) 100%
   );
+
+  /* Portfolio — 2-colour system: violet · teal. Intro curtain + backdrop use the same pair. */
+  --pf-a: #b44bff;
+  --pf-b: #0b8577;
+
+  --pf-title-grad: linear-gradient(118deg, var(--pf-a) 0%, var(--pf-b) 100%);
+  --pf-subtitle-grad: linear-gradient(96deg, var(--pf-b) 0%, var(--pf-a) 100%);
+  --pf-stripe-grad: linear-gradient(180deg, var(--pf-a) 0%, var(--pf-b) 100%);
+  /* Project card titles: violet-led, teal anchor, hint of pink only (link grad unchanged). */
+  --pf-card-pink: #e45eb0;
+  --pf-card-title-grad: linear-gradient(
+    112deg,
+    var(--pf-a) 0%,
+    color-mix(in srgb, var(--pf-a) 82%, var(--pf-card-pink)) 18%,
+    var(--pf-a) 38%,
+    color-mix(in srgb, var(--pf-a) 65%, var(--pf-b)) 58%,
+    var(--pf-b) 78%,
+    color-mix(in srgb, var(--pf-a) 45%, var(--pf-b)) 100%
+  );
+  --pf-btn-mesh-grad: linear-gradient(
+    132deg,
+    color-mix(in srgb, var(--pf-a) 28%, #090418) 0%,
+    color-mix(in srgb, var(--pf-b) 32%, #040e0d) 40%,
+    color-mix(in srgb, var(--pf-a) 32%, #080318) 72%,
+    color-mix(in srgb, var(--pf-b) 28%, #040e0d) 100%
+  );
+  --pf-link-grad: linear-gradient(92deg, var(--pf-b) 0%, var(--pf-a) 100%);
 }
 
 .app {
@@ -123,18 +150,18 @@
 
 /* Intro veil: grain on shell; colour mesh lives in GalaxyIntroBackdrop (Tailwind) */
 .galaxy-intro-curtain {
-  /* https://codepen.io/Margarita-the-solid/pen/ByzgBxm */
-  --pen-bg: #0f1815;
-  --pen-mint: #c8ffd8;
-  --pen-magenta: #ff6ef7;
-  --pen-blue: #5eadff;
-  --pen-ember: #ffb078;
-  --pen-text: #e8e6f0;
-  --loader-moss-0: #1c2e28;
-  --loader-moss-1: #203632;
-  --loader-moss-2: #263e38;
-  --loader-moss-glow: rgba(130, 210, 160, 0.38);
-  --loader-floor: color-mix(in srgb, #1a1432 70%, var(--pen-ember) 30%);
+  /* Bieber intro — same violet · teal system as :root --pf-a / --pf-b */
+  --pen-bg: #070a12;
+  --pen-mint: color-mix(in srgb, var(--pf-b) 72%, #8efceb);
+  --pen-magenta: var(--pf-b);
+  --pen-blue: var(--pf-a);
+  --pen-ember: color-mix(in srgb, var(--pf-b) 44%, #041210);
+  --pen-text: #e8f4ff;
+  --loader-moss-0: #060910;
+  --loader-moss-1: #081218;
+  --loader-moss-2: #0a1620;
+  --loader-moss-glow: color-mix(in srgb, var(--pf-b) 34%, transparent);
+  --loader-floor: color-mix(in srgb, #060912 68%, var(--pf-b) 32%);
   --galaxy-curtain-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.42' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --galaxy-curtain-grain-coarse: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.98' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
   position: absolute;
@@ -262,7 +289,7 @@
   opacity: 0.9;
 }
 
-/* Loader strip: extra magenta bloom anchored top-center (behind orbit + readout). */
+/* Loader strip: violet-led bloom (portfolio accent), teal in the falloff */
 .galaxy-intro-curtain__load::after {
   content: '';
   position: absolute;
@@ -273,8 +300,8 @@
   height: clamp(120px, 24dvh, 200px);
   background: radial-gradient(
     ellipse 52% 46% at 50% 0%,
-    color-mix(in srgb, var(--pen-magenta) 52%, transparent) 0%,
-    color-mix(in srgb, var(--pen-magenta) 26%, transparent) 40%,
+    color-mix(in srgb, var(--pf-a) 48%, transparent) 0%,
+    color-mix(in srgb, var(--pf-b) 24%, transparent) 44%,
     transparent 72%
   );
   filter: blur(38px);
@@ -383,18 +410,16 @@
   background: linear-gradient(
     118deg,
     color-mix(in srgb, var(--pen-blue) 36%, transparent) 0%,
-    color-mix(in srgb, var(--pen-magenta) 32%, transparent) 28%,
-    color-mix(in srgb, var(--pen-ember) 30%, transparent) 48%,
-    color-mix(in srgb, var(--pen-mint) 32%, transparent) 72%,
-    color-mix(in srgb, var(--pen-blue) 28%, transparent) 100%
+    color-mix(in srgb, var(--pen-magenta) 34%, transparent) 40%,
+    color-mix(in srgb, var(--pen-blue) 30%, transparent) 72%,
+    color-mix(in srgb, var(--pen-magenta) 28%, transparent) 100%
   );
   background-size: 240% 100%;
   animation: galaxy-intro-curtain-shimmer 5.5s ease-in-out infinite alternate;
   box-shadow:
-    0 0 26px color-mix(in srgb, var(--pen-mint) 24%, transparent),
-    0 0 38px color-mix(in srgb, var(--pen-magenta) 18%, transparent),
-    0 0 32px color-mix(in srgb, var(--pen-ember) 22%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    0 0 26px color-mix(in srgb, var(--pen-blue) 28%, transparent),
+    0 0 36px color-mix(in srgb, var(--pen-magenta) 20%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--pen-mint) 22%, rgba(255,255,255,0.1));
 }
 
 .galaxy-intro-curtain__load.is-reduced .galaxy-intro-curtain__track-shell {
@@ -414,8 +439,8 @@
     color-mix(in srgb, var(--loader-moss-2) 55%, var(--pen-ember)) 100%
   );
   box-shadow:
-    inset 0 1px 0 rgba(140, 190, 155, 0.12),
-    inset 0 -1px 0 rgba(8, 14, 12, 0.55);
+    inset 0 1px 0 color-mix(in srgb, var(--pen-mint) 14%, rgba(255,255,255,0.06)),
+    inset 0 -1px 0 rgba(8, 4, 18, 0.62);
   overflow: hidden;
 }
 
@@ -433,24 +458,20 @@
   transition: width 320ms cubic-bezier(0.2, 0.85, 0.25, 1);
   background: linear-gradient(
     94deg,
-    color-mix(in srgb, var(--pen-magenta) 75%, #1a1020) 0%,
-    color-mix(in srgb, var(--pen-blue) 70%, #0e1420) 18%,
-    color-mix(in srgb, var(--pen-ember) 85%, #2a1810) 34%,
-    var(--pen-mint) 44%,
-    var(--pen-blue) 58%,
-    var(--pen-magenta) 74%,
-    color-mix(in srgb, var(--pen-ember) 40%, var(--pen-mint)) 88%,
-    color-mix(in srgb, var(--pen-mint) 55%, var(--pen-blue)) 100%
+    var(--pen-magenta) 0%,
+    var(--pen-mint) 28%,
+    var(--pen-blue) 52%,
+    var(--pen-mint) 76%,
+    var(--pen-magenta) 100%
   );
   background-size: 280% 100%;
   animation:
     galaxy-intro-curtain-shimmer 2.9s ease-in-out infinite alternate,
     galaxy-intro-bar-pulse 3.6s ease-in-out infinite;
   box-shadow:
-    0 0 16px color-mix(in srgb, var(--pen-mint) 38%, transparent),
-    0 0 28px color-mix(in srgb, var(--pen-magenta) 32%, transparent),
-    0 0 22px color-mix(in srgb, var(--pen-ember) 28%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    0 0 14px color-mix(in srgb, var(--pen-magenta) 55%, transparent),
+    0 0 24px color-mix(in srgb, var(--pen-blue) 40%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--pen-mint) 45%, rgba(255,255,255,0.25));
 }
 
 .galaxy-intro-curtain__fill::after {
@@ -464,7 +485,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.55) 48%,
+    color-mix(in srgb, var(--pen-mint) 55%, rgba(255,255,255,0.28)) 48%,
     transparent 100%
   );
   transform: translateX(-100%);
@@ -617,17 +638,17 @@
       0 0 0 1px rgba(255, 255, 255, 0.1),
       0 1px 0 rgba(255, 255, 255, 0.06) inset,
       0 32px 100px rgba(10, 22, 28, 0.52),
-      0 12px 48px rgba(179, 255, 200, 0.12),
-      0 8px 36px rgba(255, 110, 247, 0.1),
-      0 20px 56px rgba(255, 176, 120, 0.14);
+      0 12px 48px rgba(11, 133, 119, 0.16),
+      0 8px 36px rgba(180, 75, 255, 0.14),
+      0 20px 56px rgba(11, 133, 119, 0.12);
   }
 
   .galaxy-intro-curtain__load::before {
     background: radial-gradient(
       ellipse 52% 44% at 50% 50%,
-      rgba(179, 255, 200, 0.09) 0%,
-      rgba(255, 110, 247, 0.09) 38%,
-      rgba(255, 160, 88, 0.12) 52%,
+      rgba(11, 133, 119, 0.12) 0%,
+      rgba(180, 75, 255, 0.1) 38%,
+      rgba(8, 14, 20, 0.2) 52%,
       transparent 72%
     );
   }
@@ -635,49 +656,43 @@
   .galaxy-intro-curtain__track-shell {
     background: linear-gradient(
       118deg,
-      rgba(94, 173, 255, 0.33) 0%,
-      rgba(255, 110, 247, 0.3) 26%,
-      rgba(255, 176, 120, 0.28) 48%,
-      rgba(179, 255, 200, 0.28) 72%,
-      rgba(94, 173, 255, 0.24) 100%
+      rgba(180, 75, 255, 0.32) 0%,
+      rgba(11, 133, 119, 0.28) 40%,
+      rgba(180, 75, 255, 0.26) 72%,
+      rgba(11, 133, 119, 0.24) 100%
     );
     box-shadow:
-      0 0 26px rgba(179, 255, 200, 0.18),
-      0 0 38px rgba(255, 110, 247, 0.12),
-      0 0 32px rgba(255, 176, 120, 0.16),
-      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      0 0 26px rgba(180, 75, 255, 0.2),
+      0 0 36px rgba(11, 133, 119, 0.16),
+      inset 0 1px 0 rgba(142, 252, 235, 0.12);
   }
 
   .galaxy-intro-curtain__fill {
     background: linear-gradient(
       94deg,
-      #6b3d7a 0%,
-      #3d5a8f 16%,
-      #c07040 30%,
-      #b3ffc8 42%,
-      #5eadff 58%,
-      #ff6ef7 74%,
-      #e89868 88%,
-      #7ec9e0 100%
+      #0b8577 0%,
+      #5ef0de 26%,
+      #b44bff 52%,
+      #5ef0de 74%,
+      #0b8577 100%
     );
     box-shadow:
-      0 0 16px rgba(179, 255, 200, 0.35),
-      0 0 28px rgba(255, 110, 247, 0.25),
-      0 0 22px rgba(255, 176, 120, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      0 0 14px rgba(11, 133, 119, 0.45),
+      0 0 24px rgba(180, 75, 255, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
   }
 
   .galaxy-intro-curtain__pct-num {
     color: rgba(255, 255, 255, 0.97);
     text-shadow:
-      0 0 32px rgba(179, 255, 200, 0.3),
-      0 0 56px rgba(255, 110, 247, 0.2),
+      0 0 32px rgba(11, 133, 119, 0.28),
+      0 0 56px rgba(180, 75, 255, 0.2),
       0 2px 0 rgba(0, 0, 0, 0.22);
   }
 
   .galaxy-intro-curtain__pct-sym {
     color: rgba(232, 230, 240, 0.72);
-    text-shadow: 0 0 18px rgba(94, 173, 255, 0.32);
+    text-shadow: 0 0 18px rgba(180, 75, 255, 0.28);
   }
 }
 
@@ -1161,38 +1176,35 @@ h2 {
   --ag-hl: 1;
 }
 
-/* Back to galaxy: moss–mint–blue conic rim (still pointer-reactive) */
+/* Back to galaxy: rim — tiffany · pink · violet */
 .planet-panel-back-btn.ambient-glow-frame--control {
   background-blend-mode: soft-light, color-dodge, normal, normal, normal, normal;
   background-image:
     radial-gradient(
       farthest-side circle at var(--pointer-x) var(--pointer-y),
-      hsla(145, 48%, 84%, var(--ag-hl)) 8%,
-      hsla(168, 42%, 68%, calc(var(--ag-hl) * 0.82)) 24%,
-      hsla(200, 45%, 58%, 0) 66%
+      color-mix(in srgb, var(--pf-a) 72%, rgba(255,255,255,0.5)) calc(var(--ag-hl) * 8%) 0%,
+      color-mix(in srgb, var(--pf-b) 60%, rgba(255,255,255,0.3)) calc(var(--ag-hl) * 0.72) 24%,
+      transparent 66%
     ),
-    radial-gradient(42% 50% at 5% 26%, rgba(108, 168, 124, 0.5) 0%, transparent 100%),
-    radial-gradient(44% 52% at 94% 74%, rgba(94, 173, 255, 0.4) 0%, transparent 100%),
-    radial-gradient(84% 84% at 46% 48%, rgba(179, 255, 200, 0.26) 20%, transparent 58%),
+    radial-gradient(42% 50% at 5% 26%, color-mix(in srgb, var(--pf-b) 44%, transparent) 0%, transparent 100%),
+    radial-gradient(44% 52% at 94% 74%, color-mix(in srgb, var(--pf-a) 40%, transparent) 0%, transparent 100%),
+    radial-gradient(84% 84% at 46% 48%, color-mix(in srgb, var(--pf-a) 26%, transparent) 20%, transparent 58%),
     conic-gradient(
       from var(--ag-rot1) at 50% 50%,
-      #6b8f72 5%,
-      transparent 14%,
-      transparent 30%,
-      #b3ffc8 40%,
-      #5eadff 50%,
-      #b3ffc8 58%,
-      transparent 72%,
-      transparent 86%,
-      #d4a8c8 96%
+      transparent 0%,
+      var(--pf-a) 18%,
+      var(--pf-b) 38%,
+      transparent 52%,
+      var(--pf-a) 68%,
+      transparent 82%,
+      var(--pf-a) 100%
     ),
     conic-gradient(
       from var(--ag-rot2) at 50% 50%,
-      #8fb89a 0%,
-      #5eadff 26%,
-      rgba(255, 110, 247, 0.85) 50%,
-      #5a7a62 74%,
-      #9dd4b8 100%
+      var(--pf-a) 0%,
+      var(--pf-a) 34%,
+      var(--pf-b) 64%,
+      var(--pf-a) 100%
     );
 }
 
@@ -1211,30 +1223,29 @@ h2 {
   background-image:
     radial-gradient(
       farthest-side circle at var(--pointer-x) var(--pointer-y),
-      hsla(222, 100%, 96%, calc(var(--ag-hl) * 0.22)) 10%,
-      hsla(210, 100%, 72%, calc(var(--ag-hl) * 0.12)) 28%,
+      color-mix(in srgb, var(--pf-a) 52%, transparent) calc(var(--ag-hl) * 10%) 0%,
+      color-mix(in srgb, var(--pf-b) 42%, transparent) calc(var(--ag-hl) * 8%) 26%,
       transparent 64%
     ),
-    radial-gradient(40% 51% at 8% 30%, rgba(87, 214, 255, 0.16) 0%, transparent 100%),
-    radial-gradient(40% 52% at 86% 68%, rgba(0, 255, 195, 0.12) 0%, transparent 100%),
-    radial-gradient(78% 78% at 50% 48%, rgba(0, 193, 255, 0.12) 24%, transparent 58%),
+    radial-gradient(40% 51% at 8% 30%, color-mix(in srgb, var(--pf-b) 22%, transparent) 0%, transparent 100%),
+    radial-gradient(40% 52% at 86% 68%, color-mix(in srgb, var(--pf-a) 20%, transparent) 0%, transparent 100%),
+    radial-gradient(78% 78% at 50% 48%, color-mix(in srgb, var(--pf-a) 14%, transparent) 24%, transparent 58%),
     conic-gradient(
       from var(--ag-rot1) at 50% 50%,
-      rgba(169, 76, 255, 0.35) 5%,
+      color-mix(in srgb, var(--pf-a) 58%, transparent) 5%,
       transparent 20%,
-      transparent 40%,
-      rgba(0, 255, 195, 0.28) 48%,
-      rgba(0, 255, 195, 0.28) 52%,
-      transparent 60%,
+      transparent 38%,
+      color-mix(in srgb, var(--pf-b) 48%, transparent) 50%,
+      transparent 62%,
       transparent 82%,
-      rgba(169, 76, 255, 0.32) 95%
+      color-mix(in srgb, var(--pf-a) 52%, transparent) 95%
     ),
     conic-gradient(
       from var(--ag-rot2) at 50% 50%,
-      rgba(90, 255, 243, 0.22) 0%,
-      rgba(190, 120, 255, 0.2) 34%,
-      rgba(190, 120, 255, 0.2) 66%,
-      rgba(90, 255, 243, 0.22) 100%
+      color-mix(in srgb, var(--pf-b) 38%, transparent) 0%,
+      color-mix(in srgb, var(--pf-a) 42%, transparent) 34%,
+      color-mix(in srgb, var(--pf-a) 38%, transparent) 66%,
+      color-mix(in srgb, var(--pf-b) 34%, transparent) 100%
     );
 }
 
@@ -1289,7 +1300,8 @@ h2 {
 
 .ambient-glow-frame--subtle:hover::after {
   scale: 0.94;
-  opacity: 0.52;
+  opacity: 0.62;
+  filter: blur(22px) brightness(1.08) saturate(1.28);
 }
 
 .ambient-glow-frame__inner {
@@ -1335,6 +1347,12 @@ h2 {
   .ambient-glow-frame--subtle {
     animation: none !important;
   }
+
+  .project-card .project-card__ambient-inner {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .planet-panel-back-btn.ambient-glow-frame {
@@ -1350,28 +1368,168 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   width: max-content;
   max-width: min(240px, 52vw);
   min-height: 48px;
-  padding: 11px 16px;
+  padding: 11px 20px;
   border-radius: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #e8f4ec;
+  /* Match .project-card h4 (project title) */
+  font-family: 'Syne', 'Poppins', system-ui, sans-serif;
+  font-size: clamp(13px, 1.12vw, 15px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-transform: none;
+  color: #fff;
   cursor: pointer;
-  background: rgba(18, 32, 26, 0.74);
-  border: 1px solid rgba(120, 175, 140, 0.38);
-  box-shadow: inset 0 1px 0 rgba(200, 255, 220, 0.08);
+  position: relative;
+  overflow: hidden;
+  background: var(--pf-btn-mesh-grad);
+  background-size: 165% 165%;
+  animation: innerBtnGrad 9s ease-in-out infinite;
+  border: 1px solid color-mix(in srgb, var(--pf-a) 30%, rgba(255, 255, 255, 0.12));
+  box-shadow:
+    0 0 22px color-mix(in srgb, var(--pf-b) 28%, transparent),
+    0 0 32px color-mix(in srgb, var(--pf-a) 20%, transparent),
+    0 0 24px color-mix(in srgb, var(--pf-a) 16%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--pf-a) 15%, rgba(255,255,255,0.06));
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition:
+    letter-spacing 0.38s ease,
+    box-shadow 0.38s ease,
+    border-color 0.38s ease,
+    transform 0.18s ease;
+}
+
+.planet-panel-back-btn__label {
+  position: relative;
+  z-index: 1;
+  color: color-mix(in srgb, var(--pf-a) 82%, rgba(236, 232, 252, 0.96));
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .planet-panel-back-btn__inner .planet-panel-back-btn__label {
+    background-image: var(--pf-card-title-grad);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: filter 0.5s ease;
+    animation: project-card-title-grad-shift 17s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .planet-panel-back-btn__inner .planet-panel-back-btn__label {
+      animation: none !important;
+      background-size: 160% 100%;
+    }
+  }
+}
+
+@keyframes innerBtnGrad {
+  0% {
+    background-position: 0% 40%;
+  }
+  50% {
+    background-position: 100% 60%;
+  }
+  100% {
+    background-position: 0% 40%;
+  }
+}
+
+/* Nebula glow blob — GSAP drives opacity / scale / filter */
+.planet-panel-back-btn__glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      ellipse 88% 66% at 50% 54%,
+      color-mix(in srgb, var(--pf-b) 36%, transparent) 0%,
+      color-mix(in srgb, var(--pf-a) 28%, transparent) 38%,
+      color-mix(in srgb, var(--pf-a) 22%, transparent) 68%,
+      transparent 90%
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Planet button icon — ring spins faster, body slower, axis 10° tilt */
+.planet-btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  overflow: visible;
+  transform: rotate(10deg);
+  filter:
+    drop-shadow(0 0 3px color-mix(in srgb, var(--pf-a) 72%, transparent))
+    drop-shadow(0 0 7px color-mix(in srgb, var(--pf-b) 80%, transparent));
+}
+
+.planet-btn-ring {
+  transform-origin: 9px 9px;
+  animation: planetRingSpin 3.2s linear infinite;
+}
+
+.planet-btn-body {
+  transform-origin: 9px 9px;
+  animation: planetBodySpin 8s linear infinite;
+}
+
+@keyframes planetRingSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes planetBodySpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Stronger outer chromatic bloom for back btn */
+.planet-panel-back-btn.ambient-glow-frame::after {
+  inset: -14px;
+  opacity: 0.9;
+  filter: blur(30px) brightness(1.06) contrast(0.9) saturate(1.5);
+}
+
+.planet-panel-back-btn .planet-panel-back-btn__inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    168deg,
+    color-mix(in srgb, var(--pf-a) 14%, transparent) 0%,
+    color-mix(in srgb, var(--pf-a) 8%, transparent) 38%,
+    transparent 60%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+  mix-blend-mode: soft-light;
+  opacity: 1;
+  filter: none;
+  transition: none;
 }
 
 @media (hover: hover) {
   .planet-panel-back-btn.ambient-glow-frame:hover .planet-panel-back-btn__inner {
-    background: rgba(22, 40, 32, 0.84);
-    border-color: rgba(140, 210, 165, 0.48);
+    letter-spacing: -0.02em;
+    border-color: color-mix(in srgb, var(--pf-a) 48%, rgba(255, 255, 255, 0.38));
+    box-shadow:
+      0 0 28px color-mix(in srgb, var(--pf-b) 52%, transparent),
+      0 0 44px color-mix(in srgb, var(--pf-a) 30%, transparent),
+      0 0 34px color-mix(in srgb, var(--pf-a) 24%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--pf-a) 18%, rgba(255,255,255,0.1));
+    animation-duration: 2s;
   }
+}
+
+.planet-panel-back-btn.ambient-glow-frame:active .planet-panel-back-btn__inner {
+  transform: scale(0.96);
+  animation-duration: 1s;
 }
 
 .planet-panel {
@@ -1387,16 +1545,28 @@ h2 {
   border-radius: 20px;
   border: var(--glass-rim-stroke) solid transparent;
   background:
-    linear-gradient(132deg, rgba(255, 138, 206, 0.16), rgba(137, 245, 255, 0.04)) padding-box,
-    linear-gradient(170deg, rgba(42, 66, 112, 0.38), rgba(26, 88, 120, 0.03)) padding-box,
-    var(--glass-rim) border-box;
+    linear-gradient(
+      148deg,
+      color-mix(in srgb, var(--pf-b) 10%, transparent),
+      color-mix(in srgb, var(--pf-a) 8%, transparent) 40%,
+      color-mix(in srgb, var(--pf-a) 7%, transparent)
+    ) padding-box,
+    linear-gradient(170deg, rgba(20, 12, 36, 0.72), rgba(8, 24, 28, 0.64)) padding-box,
+    linear-gradient(
+      218deg,
+      color-mix(in srgb, var(--pf-a) 36%, rgba(255,255,255,0.22)) 0%,
+      color-mix(in srgb, var(--pf-a) 18%, rgba(255,255,255,0.08)) 38%,
+      color-mix(in srgb, var(--pf-b) 22%, rgba(45,20,60,0.45)) 72%,
+      rgba(6, 4, 18, 0.82) 100%
+    ) border-box;
   background-clip: padding-box, padding-box, border-box;
   background-origin: padding-box, padding-box, border-box;
   box-shadow:
-    0 24px 64px rgba(10, 32, 74, 0.42),
-    0 0 44px rgba(110, 212, 255, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.42),
-    inset 0 -1px 0 rgba(165, 246, 255, 0.22);
+    0 24px 64px rgba(8, 4, 20, 0.55),
+    0 0 40px color-mix(in srgb, var(--pf-a) 14%, transparent),
+    0 0 32px color-mix(in srgb, var(--pf-b) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--pf-a) 38%, rgba(255,255,255,0.28)),
+    inset 0 -1px 0 color-mix(in srgb, var(--pf-a) 22%, rgba(255,255,255,0.08));
   backdrop-filter: blur(20px) saturate(155%);
   -webkit-backdrop-filter: blur(20px) saturate(155%);
   padding: 10px 12px 12px;
@@ -1415,29 +1585,6 @@ h2 {
   opacity: 0.92;
 }
 
-.planet-panel::after {
-  content: "";
-  position: absolute;
-  top: -45%;
-  left: -38%;
-  width: 34%;
-  height: 190%;
-  transform: rotate(18deg) translateX(0);
-  pointer-events: none;
-  z-index: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.2) 42%,
-    rgba(190, 245, 255, 0.44) 52%,
-    rgba(255, 255, 255, 0.16) 60%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  filter: blur(1.5px);
-  opacity: 0;
-  animation: panelSheen 1.6s cubic-bezier(0.2, 0.78, 0.28, 1) 0.3s both;
-}
-
 .planet-panel-head {
   position: relative;
   z-index: 2;
@@ -1449,15 +1596,102 @@ h2 {
   margin-bottom: 8px;
 }
 
+/* Media still mounting: thin indeterminate strip (replaces “frozen” lite shell). */
+.planet-panel.planet-panel--lite .planet-panel-head {
+  padding-bottom: 12px;
+  margin-bottom: 6px;
+}
+
+.planet-panel.planet-panel--lite .planet-panel-head::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--pf-b) 28%, transparent),
+    color-mix(in srgb, var(--pf-a) 55%, transparent),
+    color-mix(in srgb, var(--pf-b) 32%, transparent),
+    color-mix(in srgb, var(--pf-a) 40%, transparent)
+  );
+  background-size: 220% 100%;
+  opacity: 0.85;
+  animation: planet-panel-media-prime 1.05s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planet-panel.planet-panel--lite .planet-panel-head::after {
+    animation: none;
+    background-size: 100% 100%;
+    opacity: 0.7;
+  }
+}
+
+@keyframes planet-panel-media-prime {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+.planet-panel-head > div:first-child {
+  position: relative;
+  min-width: 0;
+  padding-left: 13px;
+}
+
 .planet-panel h3 {
-  margin: 0 0 2px;
-  font-size: clamp(20px, 1.55vw, 28px);
+  margin: 0 0 4px;
+  font-family: 'Syne', 'Poppins', system-ui, sans-serif;
+  font-size: clamp(1.15rem, 1.65vw, 1.65rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  color: #f2f9ff;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .planet-panel h3 {
+    background-image: var(--pf-title-grad);
+    background-size: 155% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 .planet-panel-head p {
   margin: 0;
-  color: rgba(229, 244, 255, 0.86);
-  font-size: 12px;
+  max-width: 42ch;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: clamp(11px, 1.05vw, 12.5px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--pf-a) 85%, rgba(255,255,255,0.6));
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .planet-panel-head p {
+    background-image: var(--pf-subtitle-grad);
+    background-size: 140% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes backBtnGradientSlide {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .planet-panel-back-btn {
@@ -1468,40 +1702,75 @@ h2 {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   min-height: 48px;
-  padding: 11px 16px;
+  padding: 11px 20px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 201, 177, 0.5);
-  background: rgba(240, 252, 255, 0.12);
-  color: #f4fcff;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  border: 1px solid color-mix(in srgb, var(--pf-a) 28%, rgba(255, 255, 255, 0.1));
+  background: transparent;
+  font-family: 'Syne', 'Poppins', system-ui, sans-serif;
+  color: #fff;
+  font-size: clamp(13px, 1.12vw, 15px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-transform: none;
   cursor: pointer;
   box-shadow:
-    0 0 0 1px rgba(255, 64, 129, 0.22) inset,
-    0 0 18px rgba(0, 201, 177, 0.32),
-    0 0 32px rgba(255, 64, 129, 0.2),
-    0 6px 16px rgba(0, 0, 0, 0.32);
+    0 0 18px color-mix(in srgb, var(--pf-b) 20%, transparent),
+    0 0 28px color-mix(in srgb, var(--pf-a) 14%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--pf-a) 20%, rgba(255,255,255,0.1));
+  overflow: hidden;
   transition:
-    box-shadow 0.35s ease,
-    background 0.35s ease,
-    transform 0.22s ease,
-    border-color 0.35s ease;
+    box-shadow 0.42s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.42s ease,
+    letter-spacing 0.42s ease,
+    transform 0.2s ease;
+}
+
+.planet-panel-back-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    270deg,
+    color-mix(in srgb, var(--pf-b) 36%, transparent),
+    color-mix(in srgb, var(--pf-a) 32%, transparent),
+    color-mix(in srgb, var(--pf-a) 30%, transparent),
+    color-mix(in srgb, var(--pf-b) 34%, transparent)
+  );
+  background-size: 300% 300%;
+  opacity: 0;
+  transition: opacity 0.42s ease;
+  pointer-events: none;
 }
 
 .planet-panel-back-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
+  box-shadow:
+    0 0 28px color-mix(in srgb, var(--pf-b) 38%, transparent),
+    0 0 22px color-mix(in srgb, var(--pf-a) 26%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--pf-a) 30%, rgba(255,255,255,0.22));
+}
+
+.planet-panel-back-btn:active::before {
+  opacity: 1;
+  animation: backBtnGradientSlide 1.2s ease infinite;
 }
 
 @media (hover: hover) {
   .planet-panel-back-btn:hover {
-    background: rgba(248, 252, 255, 0.2);
-    border-color: rgba(0, 201, 177, 0.72);
+    border-color: color-mix(in srgb, var(--pf-a) 55%, rgba(255, 255, 255, 0.2));
+    letter-spacing: -0.02em;
     box-shadow:
-      0 0 0 1px rgba(255, 64, 129, 0.32) inset,
-      0 0 26px rgba(0, 201, 177, 0.48),
-      0 0 44px rgba(255, 64, 129, 0.3),
-      0 8px 20px rgba(0, 0, 0, 0.36);
+      0 0 28px color-mix(in srgb, var(--pf-b) 32%, transparent),
+      0 0 40px color-mix(in srgb, var(--pf-a) 22%, transparent),
+      0 0 30px color-mix(in srgb, var(--pf-a) 18%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--pf-a) 35%, rgba(255,255,255,0.2));
+  }
+
+  .planet-panel-back-btn:hover::before {
+    opacity: 1;
+    animation: backBtnGradientSlide 2.4s ease infinite;
   }
 }
 
@@ -1513,12 +1782,18 @@ h2 {
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  gap: 0;
-  scroll-snap-type: x mandatory;
+  gap: 5%;
+  scroll-snap-type: y mandatory;
   padding-bottom: 2px;
   background: transparent;
   scrollbar-width: thin;
   scrollbar-color: rgba(159, 229, 255, 0.45) transparent;
+}
+
+@media (min-width: 851px) {
+  .planet-grid {
+    gap: 1%;
+  }
 }
 
 .planet-grid::-webkit-scrollbar {
@@ -1535,82 +1810,301 @@ h2 {
   border-radius: 999px;
 }
 
+.planet-panel-carousel-shell {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.planet-carousel-nav {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--pf-a) 38%, rgba(255, 255, 255, 0.18));
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--pf-a) 14%, rgba(8, 10, 22, 0.92)),
+      color-mix(in srgb, var(--pf-b) 12%, rgba(6, 14, 18, 0.9))
+    );
+  color: color-mix(in srgb, var(--pf-a) 72%, #fff);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.45),
+    0 0 22px color-mix(in srgb, var(--pf-a) 22%, transparent),
+    0 0 18px color-mix(in srgb, var(--pf-b) 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--pf-a) 22%, rgba(255, 255, 255, 0.12));
+  transition: transform 0.18s ease, box-shadow 0.22s ease, opacity 0.22s ease;
+}
+
+.planet-carousel-nav--prev {
+  left: 6px;
+}
+
+.planet-carousel-nav--next {
+  right: 6px;
+}
+
+.planet-carousel-nav:active:not(.is-disabled) {
+  transform: translateY(-50%) scale(0.94);
+}
+
+.planet-carousel-nav.is-disabled {
+  opacity: 0.3;
+  cursor: default;
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .planet-carousel-nav:hover:not(.is-disabled) {
+    box-shadow:
+      0 12px 32px rgba(0, 0, 0, 0.5),
+      0 0 28px color-mix(in srgb, var(--pf-a) 30%, transparent),
+      0 0 22px color-mix(in srgb, var(--pf-b) 22%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--pf-a) 28%, rgba(255, 255, 255, 0.16));
+  }
+}
+
+/**
+ * AR/VR (all mask cards): horizontal reel, compact cards, portrait video aspect — no 16:10 stretch.
+ */
+.planet-panel:has(.planet-grid--ar-showcase) {
+  max-height: min(86dvh, 680px);
+  overflow: hidden;
+}
+
+/* AR + large-media: card width ~ other planets (42vw cap), taller media stack. */
+.planet-panel.planet-panel--large-media:has(.planet-grid--ar-showcase) {
+  max-height: min(90dvh, 380px);
+}
+
+.planet-grid--ar-showcase {
+  width: 100%;
+  box-sizing: border-box;
+  padding-inline: 2px;
+  scroll-snap-type: x proximity;
+  align-items: stretch;
+}
+
+.planet-grid--ar-showcase:has(.project-card:nth-child(2):last-child) {
+  justify-content: space-between;
+}
+
+@media (min-width: 1301px) {
+  .planet-grid--ar-showcase:has(.project-card:nth-child(2):last-child) {
+    justify-content: center;
+  }
+}
+
+.planet-grid--ar-showcase .project-card--ar-mask {
+  flex: 0 0 clamp(300px, 42vw, 680px);
+  min-width: clamp(300px, 42vw, 680px);
+  max-width: clamp(300px, 45vw, 680px);
+}
+
+/* Stretch inner column so shorter mask rows match the taller card (pair vs 2×2 stills). */
+.planet-grid--ar-showcase > .project-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.planet-grid--ar-showcase .project-card__ambient-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.planet-grid--ar-showcase .project-card-ar-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(58dvh, 580px);
+  width: 100%;
+  aspect-ratio: unset;
+  grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+  align-items: stretch;
+  gap: clamp(10px, 1.2vw, 14px);
+}
+
+.planet-grid--ar-showcase .project-card--ar-mask .project-card-preview {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  overflow: visible;
+}
+
+/**
+ * Portrait slot: aspect-ratio sizes the box (vars inherit from .project-card-ar-layout).
+ * Media position:absolute so iframe/video never get flex-stretched; object-fit:contain = full frame + controls.
+ */
+.planet-grid--ar-showcase .project-card-preview--ar {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: var(--ar-video-w, 9) / var(--ar-video-h, 16);
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+.planet-grid--ar-showcase .project-card-preview--ar :is(
+    video,
+    iframe,
+    .project-video-placeholder,
+    .project-video-poster,
+    .project-studio-preview,
+    .project-media-slot
+  ) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(203, 240, 255, 0.44);
+  background: rgba(2, 4, 10, 0.8);
+  aspect-ratio: unset;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Horizontal reel: skip off-screen intrinsic placeholder — real card heights vs 300×280 caused jumps. */
+.planet-grid--ar-showcase .project-card {
+  content-visibility: visible;
+}
+
+.planet-grid--ar-showcase .project-card--ar-mask .project-card-screenshots {
+  min-height: 0;
+  height: 100%;
+}
+
+/* Full stills in cells (Drive portraits were cropped with global cover). */
+.planet-grid--ar-showcase .project-card-shot {
+  background: rgba(2, 6, 18, 0.2);
+}
+
+.planet-grid--ar-showcase .project-card-shot img {
+  object-fit: contain;
+  object-position: center;
+}
+
+.planet-grid--ar-showcase .project-card--ar-mask p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .project-card {
   flex: 0 0 min(42vw, 520px);
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 280px;
   border-radius: 14px;
   border: var(--glass-rim-stroke) solid transparent;
   background:
-    linear-gradient(160deg, rgba(255, 167, 223, 0.18), rgba(143, 246, 255, 0.16)) padding-box,
-    rgba(19, 42, 72, 0.56) padding-box,
-    var(--glass-rim) border-box;
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--pf-a) 14%, transparent),
+      color-mix(in srgb, var(--pf-b) 12%, transparent)
+    ) padding-box,
+    color-mix(in srgb, var(--pf-b) 8%, rgba(6, 10, 18, 0.72)) padding-box,
+    linear-gradient(
+      218deg,
+      color-mix(in srgb, var(--pf-a) 28%, rgba(255, 255, 255, 0.12)) 0%,
+      color-mix(in srgb, var(--pf-b) 18%, rgba(255, 255, 255, 0.06)) 42%,
+      rgba(6, 8, 16, 0.55) 100%
+    ) border-box;
   background-clip: padding-box, padding-box, border-box;
   background-origin: padding-box, padding-box, border-box;
 
   padding: 8px;
   scroll-snap-align: start;
-  transform: translateY(24px) scale(0.975);
   opacity: 0;
   animation: projectCardIn 0.9s cubic-bezier(0.19, 0.86, 0.25, 1) forwards;
 }
 
-.project-card:nth-child(1) { animation-delay: 0.22s; }
-.project-card:nth-child(2) { animation-delay: 0.32s; }
-.project-card:nth-child(3) { animation-delay: 0.42s; }
-.project-card:nth-child(4) { animation-delay: 0.52s; }
-.project-card:nth-child(5) { animation-delay: 0.62s; }
-.project-card:nth-child(6) { animation-delay: 0.72s; }
-.project-card:nth-child(7) { animation-delay: 0.82s; }
-.project-card:nth-child(8) { animation-delay: 0.92s; }
+.project-card:nth-child(1) {
+  animation-delay: 0.22s;
+}
+.project-card:nth-child(1) .project-card__ambient-inner {
+  animation-delay: 0.22s;
+}
 
-/* Ambient border wins over legacy glass shorthand on the same node (must follow .project-card). */
+.project-card:nth-child(2) {
+  animation-delay: 0.32s;
+}
+.project-card:nth-child(2) .project-card__ambient-inner {
+  animation-delay: 0.32s;
+}
+
+.project-card:nth-child(3) {
+  animation-delay: 0.42s;
+}
+.project-card:nth-child(3) .project-card__ambient-inner {
+  animation-delay: 0.42s;
+}
+
+.project-card:nth-child(4) {
+  animation-delay: 0.52s;
+}
+.project-card:nth-child(4) .project-card__ambient-inner {
+  animation-delay: 0.52s;
+}
+
+.project-card:nth-child(5) {
+  animation-delay: 0.62s;
+}
+.project-card:nth-child(5) .project-card__ambient-inner {
+  animation-delay: 0.62s;
+}
+
+.project-card:nth-child(6) {
+  animation-delay: 0.72s;
+}
+.project-card:nth-child(6) .project-card__ambient-inner {
+  animation-delay: 0.72s;
+}
+
+.project-card:nth-child(7) {
+  animation-delay: 0.82s;
+}
+.project-card:nth-child(7) .project-card__ambient-inner {
+  animation-delay: 0.82s;
+}
+
+.project-card:nth-child(8) {
+  animation-delay: 0.92s;
+}
+.project-card:nth-child(8) .project-card__ambient-inner {
+  animation-delay: 0.92s;
+}
+
+/* Ambient border: inherits layered rim from .ambient-glow-frame--subtle; only adds entrance + dual animation. */
 .project-card.ambient-glow-frame.ambient-glow-frame--subtle {
   border: none;
   padding: 0;
   overflow: visible;
   background-color: transparent;
-  background-blend-mode: soft-light, normal, normal, normal, normal, normal;
-  background-size:
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 100%;
-  background-position:
-    0 0,
-    0 0,
-    0 0,
-    50% 50%,
-    0 0,
-    0 0;
-  background-image:
-    radial-gradient(
-      farthest-side circle at var(--pointer-x) var(--pointer-y),
-      hsla(222, 100%, 96%, calc(var(--ag-hl) * 0.22)) 10%,
-      hsla(210, 100%, 72%, calc(var(--ag-hl) * 0.12)) 28%,
-      transparent 64%
-    ),
-    radial-gradient(40% 51% at 8% 30%, rgba(87, 214, 255, 0.16) 0%, transparent 100%),
-    radial-gradient(40% 52% at 86% 68%, rgba(0, 255, 195, 0.12) 0%, transparent 100%),
-    radial-gradient(78% 78% at 50% 48%, rgba(0, 193, 255, 0.12) 24%, transparent 58%),
-    conic-gradient(
-      from var(--ag-rot1) at 50% 50%,
-      rgba(169, 76, 255, 0.35) 5%,
-      transparent 20%,
-      transparent 40%,
-      rgba(0, 255, 195, 0.28) 48%,
-      rgba(0, 255, 195, 0.28) 52%,
-      transparent 60%,
-      transparent 82%,
-      rgba(169, 76, 255, 0.32) 95%
-    ),
-    conic-gradient(
-      from var(--ag-rot2) at 50% 50%,
-      rgba(90, 255, 243, 0.22) 0%,
-      rgba(190, 120, 255, 0.2) 34%,
-      rgba(190, 120, 255, 0.2) 66%,
-      rgba(90, 255, 243, 0.22) 100%
-    );
   -webkit-animation:
     ambient-glow-rotate 52s linear infinite,
     projectCardIn 0.9s cubic-bezier(0.19, 0.86, 0.25, 1) forwards;
@@ -1626,21 +2120,110 @@ h2 {
   border-radius: 12px;
   margin: 2px;
   padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--pf-a) 22%, color-mix(in srgb, var(--pf-b) 18%, rgba(255, 255, 255, 0.08)));
   background:
-    linear-gradient(160deg, rgba(255, 167, 223, 0.12), rgba(143, 246, 255, 0.1)) padding-box,
-    rgba(19, 42, 72, 0.52) padding-box;
-  background-clip: padding-box;
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--pf-b) 10%, rgba(4, 12, 14, 0.88)) 0%,
+      color-mix(in srgb, var(--pf-a) 8%, rgba(8, 4, 18, 0.82)) 48%,
+      color-mix(in srgb, var(--pf-b) 6%, rgba(6, 8, 16, 0.9)) 100%
+    ) padding-box,
+    linear-gradient(
+      118deg,
+      color-mix(in srgb, var(--pf-a) 18%, transparent),
+      color-mix(in srgb, var(--pf-b) 14%, transparent)
+    ) padding-box;
+  background-clip: padding-box, padding-box;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--pf-a) 12%, rgba(255, 255, 255, 0.08)),
+    inset 0 -1px 0 color-mix(in srgb, var(--pf-b) 10%, rgba(0, 0, 0, 0.35));
+  transition:
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.45s ease,
+    background 0.45s ease,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.9s cubic-bezier(0.19, 0.86, 0.25, 1);
+  animation: project-card-inner-in 0.88s cubic-bezier(0.19, 0.86, 0.25, 1) both;
 }
 
-/* Exactly two AR masks: split panel edge-to-edge, separated by gap (not centered as one block). */
-.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child) {
+.project-card__ambient-inner::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 15px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-card__ambient-inner > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) {
+  .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover {
+    filter: saturate(1.14) brightness(1.05);
+  }
+
+  .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover .project-card__ambient-inner {
+    transform: translateY(-10px) scale(1.018);
+    border-color: color-mix(
+      in srgb,
+      var(--pf-a) 48%,
+      color-mix(in srgb, var(--pf-b) 28%, rgba(255, 255, 255, 0.36))
+    );
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--pf-a) 16%, rgba(255, 255, 255, 0.12)),
+      inset 0 -1px 0 color-mix(in srgb, var(--pf-b) 12%, rgba(0, 0, 0, 0.26)),
+      0 22px 48px rgba(0, 0, 0, 0.42);
+  }
+
+  .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover .project-card__ambient-inner::after {
+    opacity: 1;
+    animation: project-card-inner-rim-pulse 2.85s ease-in-out infinite;
+  }
+
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover h4 {
+      background-size: 300% 100%;
+      animation: project-card-title-grad-shift 2.65s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px color-mix(in srgb, var(--pf-a) 58%, transparent))
+        drop-shadow(0 0 24px color-mix(in srgb, var(--pf-a) 38%, transparent))
+        drop-shadow(0 0 16px color-mix(in srgb, var(--pf-b) 36%, transparent));
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover {
+    filter: none;
+  }
+
+  .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover .project-card__ambient-inner {
+    transform: none;
+  }
+
+  .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover h4 {
+    animation: none !important;
+  }
+
+  .project-card.ambient-glow-frame.ambient-glow-frame--subtle:hover .project-card__ambient-inner::after {
+    animation: none !important;
+    opacity: 0;
+  }
+}
+
+/* Exactly two AR masks (legacy, no horizontal reel class): split row */
+.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child):not(.planet-grid--ar-showcase) {
   justify-content: flex-start;
   gap: 0;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: y mandatory;
 }
 
-.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child) .project-card--ar-mask {
+.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child):not(.planet-grid--ar-showcase) .project-card--ar-mask {
   flex: 0 0 min(42vw, 520px);
   min-width: min(42vw, 520px);
   max-width: min(42vw, 520px);
@@ -1688,13 +2271,54 @@ h2 {
 @keyframes projectCardIn {
   0% {
     opacity: 0;
-    transform: translateY(24px) scale(0.975);
     filter: blur(2px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
     filter: blur(0);
+  }
+}
+
+@keyframes project-card-inner-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes project-card-title-grad-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes project-card-inner-rim-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 18px color-mix(in srgb, var(--pf-a) 52%, transparent),
+      0 0 38px color-mix(in srgb, var(--pf-a) 36%, transparent),
+      0 0 30px color-mix(in srgb, var(--pf-b) 34%, transparent);
+  }
+  38% {
+    box-shadow:
+      0 0 24px color-mix(in srgb, var(--pf-a) 58%, transparent),
+      0 0 44px color-mix(in srgb, var(--pf-b) 36%, transparent),
+      0 0 26px color-mix(in srgb, var(--pf-b) 30%, transparent);
+  }
+  72% {
+    box-shadow:
+      0 0 20px color-mix(in srgb, var(--pf-b) 42%, transparent),
+      0 0 42px color-mix(in srgb, var(--pf-a) 40%, transparent),
+      0 0 28px color-mix(in srgb, var(--pf-a) 28%, transparent);
   }
 }
 
@@ -1702,35 +2326,164 @@ h2 {
   width: 100%;
 }
 
+.project-drive-video-shell {
+  position: relative;
+}
+
 .project-card-preview--ar {
   display: flex;
   justify-content: center;
 }
 
-.project-card-preview--ar :is(video, iframe, .project-video-thumb, .project-video-poster, .project-video-placeholder) {
+.project-card-preview--ar :is(
+    video,
+    iframe,
+    .project-video-thumb,
+    .project-video-poster,
+    .project-video-placeholder,
+    .project-studio-preview,
+    .project-media-slot
+  ) {
   width: min(100%, 320px);
   aspect-ratio: var(--ar-video-w, 9) / var(--ar-video-h, 16);
   background: transparent;
 }
 
-.project-card-preview--ar video {
+.planet-grid:not(.planet-grid--ar-showcase) .project-card-preview--ar video {
   object-fit: cover;
 }
 
-.project-card video,
-.project-card iframe,
+.project-card:not(.project-card--ar-mask) video,
+.project-card:not(.project-card--ar-mask) iframe,
 .project-video-thumb,
 .project-video-poster,
-.project-video-placeholder {
+.project-video-placeholder,
+.project-media-slot {
   width: 100%;
   aspect-ratio: 16 / 10;
   border-radius: 10px;
-  border: 1px solid rgba(203, 240, 255, 0.44);
+  border: 1px solid color-mix(in srgb, var(--pf-a) 28%, color-mix(in srgb, var(--pf-b) 22%, rgba(255, 255, 255, 0.12)));
   background: rgba(2, 4, 10, 0.8);
 }
 
-.project-card video {
+.project-media-slot {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.project-card:not(.project-card--ar-mask) .project-card-preview .project-media-slot {
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.project-media-slot__track {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.26s ease;
+}
+
+.project-media-slot__track.is-ready {
+  z-index: 2;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.project-media-slot .project-drive-video-shell {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.project-media-slot .project-drive-video-shell video {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+}
+
+.project-media-slot :is(iframe, video, .project-studio-preview) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none !important;
+  border-radius: inherit;
+  aspect-ratio: unset !important;
+  background: transparent;
+}
+
+.project-media-slot .project-video-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset !important;
+  border: none !important;
+  border-radius: inherit;
+}
+
+.project-card:not(.project-card--ar-mask) video {
+  object-fit: cover;
+}
+
+.project-drive-play-toggle {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 54px;
+  height: 54px;
+  border: 1px solid color-mix(in srgb, var(--pf-a) 48%, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--pf-a) 30%, rgba(255, 255, 255, 0.12)), transparent 62%),
+    color-mix(in srgb, #0a1020 68%, var(--pf-b));
+  color: color-mix(in srgb, var(--pf-a) 78%, #fff);
+  cursor: pointer;
+  z-index: 3;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.48),
+    0 0 24px color-mix(in srgb, var(--pf-a) 26%, transparent),
+    0 0 20px color-mix(in srgb, var(--pf-b) 22%, transparent);
+  transition: transform 0.18s ease, opacity 0.22s ease, box-shadow 0.22s ease;
+}
+
+.project-drive-play-toggle span {
+  margin-left: 2px;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.project-drive-play-toggle.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.88);
+}
+
+@media (hover: hover) {
+  .project-drive-play-toggle:hover {
+    transform: scale(1.04);
+    box-shadow:
+      0 10px 24px rgba(0, 0, 0, 0.48),
+      0 0 30px color-mix(in srgb, var(--pf-a) 38%, transparent),
+      0 0 24px color-mix(in srgb, var(--pf-b) 32%, transparent);
+  }
+}
+
+.project-drive-video-shell:focus-within .project-drive-play-toggle {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .project-video-poster {
@@ -1738,20 +2491,166 @@ h2 {
   object-fit: cover;
 }
 
-.project-video-placeholder {
+.project-studio-preview {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  box-sizing: border-box;
+  text-decoration: none;
+  color: inherit;
+  isolation: isolate;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.project-studio-preview img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border: none;
+  border-radius: inherit;
+}
+
+.project-studio-preview__shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    118deg,
+    transparent 34%,
+    color-mix(in srgb, #fff 9%, transparent) 48%,
+    transparent 62%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0.75;
+}
+
+.project-studio-preview__meta {
+  position: absolute;
+  inset: auto 10px 10px 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.project-studio-preview__brand {
+  font-family: Syne, system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: rgba(248, 252, 255, 0.96);
+  background: color-mix(in srgb, #03050d 58%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pf-a) 42%, rgba(255, 255, 255, 0.14));
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 6px 18px rgba(0, 0, 0, 0.42);
+}
+
+.project-studio-preview__open {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
   display: grid;
   place-items: center;
+  font-size: 13px;
+  line-height: 1;
+  color: color-mix(in srgb, var(--pf-a) 72%, #fff);
+  background: color-mix(in srgb, #03050d 52%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pf-b) 38%, rgba(255, 255, 255, 0.12));
+}
+
+@media (hover: hover) {
+  .project-studio-preview:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--pf-a) 44%, color-mix(in srgb, var(--pf-b) 32%, rgba(255, 255, 255, 0.22)));
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, 0.45),
+      0 0 28px color-mix(in srgb, var(--pf-a) 22%, transparent),
+      0 0 22px color-mix(in srgb, var(--pf-b) 18%, transparent);
+  }
+}
+
+.project-studio-preview:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--pf-a) 62%, #fff);
+  outline-offset: 3px;
+}
+
+.project-video-placeholder {
+  position: relative;
+  overflow: hidden;
+  display: grid !important;
+  place-items: center !important;
+  text-align: center;
+  padding: 16px;
+  box-sizing: border-box;
+  isolation: isolate;
+  cursor: default;
   background:
-    linear-gradient(138deg, rgba(28, 52, 90, 0.68), rgba(11, 21, 38, 0.86)),
-    radial-gradient(circle at 18% 18%, rgba(132, 236, 255, 0.24), transparent 52%);
-  color: rgba(216, 241, 255, 0.75);
+    radial-gradient(ellipse 85% 65% at 12% 10%, color-mix(in srgb, var(--pf-a) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse 75% 60% at 92% 92%, color-mix(in srgb, var(--pf-b) 16%, transparent), transparent 52%),
+    linear-gradient(
+      124deg,
+      #060a12 0%,
+      color-mix(in srgb, var(--pf-a) 10%, #080e18) 35%,
+      color-mix(in srgb, var(--pf-b) 8%, #071014) 65%,
+      #05080f 100%
+    );
+  color: color-mix(in srgb, var(--pf-a) 48%, rgba(226, 236, 248, 0.88));
   font-size: 11px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 
+.project-video-placeholder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 18%,
+    color-mix(in srgb, var(--pf-a) 24%, transparent) 42%,
+    color-mix(in srgb, var(--pf-b) 20%, transparent) 58%,
+    transparent 82%
+  );
+  transform: translateX(-120%);
+  animation: shotPlaceholderSweep 1.4s ease-in-out infinite;
+}
+
+.project-video-placeholder--bare {
+  padding: 0;
+  place-items: stretch !important;
+}
+
+.project-video-placeholder span {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-video-placeholder::after {
+    animation: none;
+    transform: none;
+    opacity: 0;
+  }
+}
+
 /* Drive `<video>`: poster + faster first play; avoid double-tap zoom delay on mobile. */
-.project-card-preview video {
+.project-card-preview video,
+.project-card-preview .project-studio-preview,
+.project-card-preview .project-media-slot {
   touch-action: manipulation;
 }
 
@@ -1768,6 +2667,12 @@ h2 {
   overflow-y: hidden !important;
 }
 
+.planet-grid--ar-showcase .project-card.ambient-glow-frame.ambient-glow-frame--subtle.project-card--ar-mask,
+.planet-grid--ar-showcase .project-card.ambient-glow-frame.ambient-glow-frame--subtle.project-card--ar-mask .project-card__ambient-inner,
+.planet-grid--ar-showcase .project-card.ambient-glow-frame.ambient-glow-frame--subtle.project-card--ar-mask .project-card-ar-layout {
+  overflow: visible !important;
+}
+
 .project-card-ar-layout {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1776,8 +2681,6 @@ h2 {
   height: auto;
   padding: 6px;
   border-radius: 12px;
-  border: var(--glass-rim-stroke) solid rgba(180, 225, 255, 0.4);
-  background: rgba(8, 16, 36, 0.22);
 }
 
 .project-card--ar-mask .project-card-preview {
@@ -1794,6 +2697,11 @@ h2 {
 
 .project-card--ar-mask .project-card-screenshots--pair {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.project-card--ar-mask .project-card-screenshots--single {
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
 }
 
@@ -1834,7 +2742,12 @@ h2 {
   border: var(--glass-rim-stroke) solid transparent;
   background:
     rgba(2, 6, 18, 0.72) padding-box,
-    var(--glass-rim) border-box;
+    linear-gradient(
+      218deg,
+      color-mix(in srgb, var(--pf-a) 32%, rgba(255, 255, 255, 0.14)) 0%,
+      color-mix(in srgb, var(--pf-b) 22%, rgba(255, 255, 255, 0.06)) 45%,
+      rgba(6, 8, 18, 0.65) 100%
+    ) border-box;
   background-clip: padding-box, border-box;
   background-origin: padding-box, border-box;
   transition:
@@ -1844,23 +2757,78 @@ h2 {
     filter 0.26s ease;
 }
 
+.project-card-shot--placeholder {
+  position: relative;
+  border-color: color-mix(in srgb, var(--pf-a) 30%, transparent);
+  cursor: default;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 85% 65% at 12% 10%, color-mix(in srgb, var(--pf-a) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse 75% 60% at 92% 92%, color-mix(in srgb, var(--pf-b) 16%, transparent), transparent 52%),
+    linear-gradient(
+      124deg,
+      #060a12 0%,
+      color-mix(in srgb, var(--pf-a) 10%, #080e18) 35%,
+      color-mix(in srgb, var(--pf-b) 8%, #071014) 65%,
+      #05080f 100%
+    ) padding-box,
+    linear-gradient(
+      200deg,
+      color-mix(in srgb, var(--pf-a) 24%, rgba(255, 255, 255, 0.07)),
+      color-mix(in srgb, var(--pf-b) 16%, rgba(255, 255, 255, 0.04))
+    ) border-box;
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+}
+
+.project-card-shot--placeholder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    color-mix(in srgb, var(--pf-a) 22%, transparent) 42%,
+    color-mix(in srgb, var(--pf-b) 18%, transparent) 58%,
+    transparent 80%
+  );
+  transform: translateX(-120%);
+  animation: shotPlaceholderSweep 1.4s ease-in-out infinite;
+}
+
 .project-card-shot:hover {
   transform: scale(1.03);
   background:
     rgba(6, 14, 32, 0.82) padding-box,
-    var(--glass-rim-hover) border-box;
+    linear-gradient(
+      118deg,
+      color-mix(in srgb, var(--pf-a) 55%, rgba(255, 255, 255, 0.22)) 0%,
+      color-mix(in srgb, var(--pf-b) 48%, rgba(255, 255, 255, 0.12)) 50%,
+      color-mix(in srgb, var(--pf-a) 40%, rgba(255, 255, 255, 0.08)) 100%
+    ) border-box;
   background-clip: padding-box, border-box;
   background-origin: padding-box, border-box;
-  filter: brightness(1.1) saturate(1.06);
+  filter: brightness(1.12) saturate(1.12);
   box-shadow:
     0 10px 26px rgba(0, 0, 0, 0.48),
-    0 0 20px rgba(140, 210, 255, 0.22);
+    0 0 28px color-mix(in srgb, var(--pf-a) 35%, transparent),
+    0 0 40px color-mix(in srgb, var(--pf-b) 22%, transparent);
+}
+
+.project-card-shot--placeholder:hover {
+  transform: none;
+  filter: none;
+  box-shadow: none;
 }
 
 .project-card-shot:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 2px rgba(140, 220, 255, 0.95),
+    0 0 0 2px color-mix(in srgb, var(--pf-a) 75%, rgba(255, 255, 255, 0.5)),
+    0 0 22px color-mix(in srgb, var(--pf-b) 45%, transparent),
     0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
@@ -1871,6 +2839,23 @@ h2 {
   min-height: 0;
   display: block;
   object-fit: cover;
+}
+
+@keyframes shotPlaceholderSweep {
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.planet-panel--lite .project-card {
+  animation: none;
+  opacity: 1;
+}
+
+.planet-panel--lite .project-card .project-card__ambient-inner {
+  animation: none;
+  opacity: 1;
+  transform: none;
 }
 
 .project-card--ar-mask p {
@@ -1909,43 +2894,92 @@ h2 {
 }
 
 .project-card h4 {
-  margin: 6px 0 2px;
-  font-size: 14px;
+  margin: 8px 0 4px;
+  font-family: 'Syne', 'Poppins', system-ui, sans-serif;
+  font-size: clamp(13px, 1.12vw, 15px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: color-mix(in srgb, var(--pf-a) 82%, rgba(236, 232, 252, 0.96));
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .project-card h4 {
+    background-image: var(--pf-card-title-grad);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: filter 0.5s ease;
+    animation: project-card-title-grad-shift 17s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .project-card h4 {
+      animation: none !important;
+      background-size: 160% 100%;
+    }
+  }
 }
 
 .project-card p {
   margin: 0;
-  color: rgba(221, 238, 255, 0.86);
-  line-height: 1.3;
-  font-size: 11px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: clamp(10.5px, 0.95vw, 12px);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  line-height: 1.42;
+  color: color-mix(in srgb, var(--pf-b) 18%, rgba(214, 244, 238, 0.88));
   display: -webkit-box;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-wrap: balance;
 }
 
 .project-card-link {
-  margin-top: 4px;
+  margin-top: 6px;
   display: inline-block;
-  color: rgba(148, 226, 255, 0.95);
-  font-size: 11px;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: clamp(10px, 0.9vw, 11.5px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: color-mix(in srgb, var(--pf-a) 88%, rgba(255,255,255,0.5));
+  border-bottom: 1px solid color-mix(in srgb, var(--pf-b) 38%, rgba(255,255,255,0.12));
+  padding-bottom: 1px;
+  transition: filter 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .project-card-link {
+    color: transparent;
+    background-image: var(--pf-link-grad);
+    background-size: 180% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    border-bottom-color: color-mix(in srgb, var(--pf-b) 48%, transparent);
+  }
 }
 
 .project-card-link:hover {
-  color: rgba(190, 240, 255, 1);
+  filter: brightness(1.12) saturate(1.08);
+  border-bottom-color: color-mix(in srgb, var(--pf-a) 65%, transparent);
 }
 
 /* Fullscreen AR screenshot lightbox (GSAP-driven). */
 .image-lightbox-root {
   position: fixed;
   inset: 0;
-  z-index: 200000;
+  z-index: 200;
   isolation: isolate;
-  display: grid;
+  display: flex;
   place-items: center;
+  justify-content: center;
   padding: min(4vw, 28px);
   pointer-events: auto;
   cursor: zoom-out;
@@ -2110,14 +3144,18 @@ h2 {
     flex-basis: min(76vw, 520px);
   }
 
-  .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child) {
+  .planet-grid--ar-showcase .project-card--ar-mask {
+    flex-basis: clamp(280px, 88vw, 680px);
+  }
+
+  .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child):not(.planet-grid--ar-showcase) {
     flex-direction: row;
     overflow-x: auto;
     align-items: start;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: y mandatory;
   }
 
-  .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child) .project-card--ar-mask {
+  .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child):not(.planet-grid--ar-showcase) .project-card--ar-mask {
     flex: 0 0 min(76vw, 520px);
     width: min(76vw, 520px);
     max-width: min(76vw, 520px);
@@ -2129,8 +3167,9 @@ h2 {
   /**
    * AR/VR mask cards: keep the same left-video + right-stills grid as desktop,
    * but sized so the glass band matches ~16:10 preview height of other planet cards.
+   * Excludes planet-grid--ar-showcase (portrait aspect preserved there).
    */
-  .project-card-ar-layout {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card-ar-layout {
     grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
@@ -2140,7 +3179,7 @@ h2 {
     max-height: none;
   }
 
-  .project-card--ar-mask .project-card-preview {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card--ar-mask .project-card-preview {
     width: 100%;
     min-width: 0;
     min-height: 0;
@@ -2149,7 +3188,7 @@ h2 {
     justify-content: center;
   }
 
-  .project-card-preview--ar :is(video, iframe, .project-video-thumb) {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card-preview--ar :is(video, iframe, .project-video-thumb, .project-media-slot) {
     width: 100%;
     height: 100%;
     max-width: none;
@@ -2157,16 +3196,16 @@ h2 {
     min-height: 0;
   }
 
-  .project-card-preview--ar video {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card-preview--ar video {
     object-fit: cover;
   }
 
-  .project-card-preview--ar .project-video-thumb img {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card-preview--ar .project-video-thumb img {
     object-fit: cover;
     height: 100%;
   }
 
-  .project-card--ar-mask .project-card-screenshots {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card--ar-mask .project-card-screenshots {
     margin-top: 0;
     min-height: 0;
     height: 100%;
@@ -2175,7 +3214,7 @@ h2 {
     grid-template-rows: repeat(2, minmax(0, 1fr));
   }
 
-  .project-card--ar-mask .project-card-screenshots--pair {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card--ar-mask .project-card-screenshots--pair {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: minmax(0, 1fr);
     height: 100%;
@@ -2222,7 +3261,7 @@ h2 {
     overflow: hidden;
   }
 
-  .project-card:not(.project-card--ar-mask) .project-card-preview :is(video, iframe, .project-video-thumb) {
+  .project-card:not(.project-card--ar-mask) .project-card-preview :is(video, iframe, .project-video-thumb, .project-media-slot) {
     width: 100%;
     height: 100%;
     max-width: none;
@@ -2234,7 +3273,7 @@ h2 {
     object-fit: cover;
   }
 
-  .project-card-ar-layout {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card-ar-layout {
     grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
@@ -2244,7 +3283,7 @@ h2 {
     max-height: none;
   }
 
-  .project-card--ar-mask .project-card-preview {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card--ar-mask .project-card-preview {
     width: 100%;
     min-width: 0;
     min-height: 0;
@@ -2253,7 +3292,7 @@ h2 {
     justify-content: center;
   }
 
-  .project-card-preview--ar :is(video, iframe, .project-video-thumb) {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card-preview--ar :is(video, iframe, .project-video-thumb, .project-media-slot) {
     width: 100%;
     height: 100%;
     max-width: none;
@@ -2261,7 +3300,7 @@ h2 {
     min-height: 0;
   }
 
-  .project-card--ar-mask .project-card-screenshots {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card--ar-mask .project-card-screenshots {
     margin-top: 0;
     min-height: 0;
     height: 100%;
@@ -2270,17 +3309,22 @@ h2 {
     grid-template-rows: repeat(2, minmax(0, 1fr));
   }
 
-  .project-card--ar-mask .project-card-screenshots--pair {
+  .planet-grid:not(.planet-grid--ar-showcase) .project-card--ar-mask .project-card-screenshots--pair {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: minmax(0, 1fr);
     height: 100%;
   }
 
-  .planet-panel {
+  .planet-panel:has(.planet-grid--ar-showcase) {
+    max-height: min(88dvh, 680px);
+    overflow: hidden;
+  }
+
+  .planet-panel:not(:has(.planet-grid--ar-showcase)) {
     height: auto;
     max-height: var(--planet-panel-portrait-max-h);
-    overflow-y: auto;
     overflow-x: hidden;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
@@ -2288,11 +3332,11 @@ h2 {
     scrollbar-color: rgba(159, 229, 255, 0.45) transparent;
   }
 
-  .planet-panel::-webkit-scrollbar {
+  .planet-panel:not(:has(.planet-grid--ar-showcase))::-webkit-scrollbar {
     width: 6px;
   }
 
-  .planet-panel::-webkit-scrollbar-thumb {
+  .planet-panel:not(:has(.planet-grid--ar-showcase))::-webkit-scrollbar-thumb {
     background: rgba(159, 229, 255, 0.45);
     border-radius: 999px;
   }
@@ -2300,21 +3344,68 @@ h2 {
   .planet-grid {
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: y mandatory;
+  }
+
+}
+
+@media (orientation: portrait) and (max-width: 1000px) {
+  /* FinTech has one card only: no horizontal reel behavior. */
+  .planet-panel--planetA .planet-grid {
+    overflow-x: hidden;
+    scroll-snap-type: none;
+  }
+
+  .planet-panel--planetA .planet-grid > .project-card {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/**
+ * Mobile Landscape: width < 1000px and height < width.
+ * Unify panel height with the AR/VR planet's larger budget.
+ */
+@media (max-width: 1000px) and (orientation: landscape) {
+  .planet-panel {
+    max-height: min(88dvh, 680px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .planet-panel:has(.planet-grid--ar-showcase) {
+    overflow: hidden;
+  }
+
+  .planet-grid {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
   }
 }
 
 @media (min-width: 1025px) and (orientation: landscape) {
-  /**
-   * AR/VR (exactly two mask cards): no vertical scroll — 2-up grid + capped preview band
-   * so 9:16 sources don’t dictate panel height (matches portrait-tablet compact band).
-   */
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)) {
+  .planet-panel:has(.planet-grid--ar-showcase) {
     max-height: calc(100dvh - 2rem - var(--layout-safe-t) - var(--layout-safe-b));
     overflow: hidden;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  /**
+   * AR/VR (exactly two mask cards, legacy layout): no vertical scroll — 2-up grid + capped preview band.
+   * Skipped when .planet-grid--ar-showcase (horizontal reel + portrait aspect).
+   */
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    ) {
+    max-height: calc(100dvh - 2rem - var(--layout-safe-t) - var(--layout-safe-b));
+    overflow: hidden;
+  }
+
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2325,7 +3416,9 @@ h2 {
     scroll-snap-type: none;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask {
     flex: initial;
@@ -2337,7 +3430,9 @@ h2 {
     flex-direction: column;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask
     .project-card__ambient-inner {
@@ -2347,7 +3442,9 @@ h2 {
     overflow: hidden;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask
     .project-card-ar-layout {
@@ -2363,7 +3460,9 @@ h2 {
     box-sizing: border-box;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask
     .project-card-preview {
@@ -2376,7 +3475,9 @@ h2 {
     justify-content: center;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask
     .project-card-preview--ar
@@ -2388,7 +3489,9 @@ h2 {
     min-height: 0;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask
     .project-card-screenshots {
@@ -2396,7 +3499,9 @@ h2 {
     height: 100%;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask
     h4 {
@@ -2404,7 +3509,9 @@ h2 {
     margin-top: 4px;
   }
 
-  .planet-panel:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+  .planet-panel:has(
+      .planet-grid:not(.planet-grid--ar-showcase):has(.project-card--ar-mask:nth-child(2):last-child)
+    )
     .planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)
     .project-card--ar-mask
     p {
@@ -2412,7 +3519,9 @@ h2 {
   }
 
   /* Other planets on desktop: keep previous max-height budget without inner vertical scroll */
-  .planet-panel:not(:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))) {
+  .planet-panel:not(:has(.planet-grid--ar-showcase)):not(
+      :has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+    ) {
     max-height: var(--planet-panel-desktop-max-h);
     overflow-y: auto;
     overflow-x: hidden;
@@ -2423,17 +3532,30 @@ h2 {
     scrollbar-color: rgba(159, 229, 255, 0.45) transparent;
   }
 
-  .planet-panel:not(:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)))::-webkit-scrollbar {
+  .planet-panel:not(:has(.planet-grid--ar-showcase)):not(
+      :has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+    )::-webkit-scrollbar {
     width: 6px;
   }
 
-  .planet-panel:not(:has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child)))::-webkit-scrollbar-thumb {
+  .planet-panel:not(:has(.planet-grid--ar-showcase)):not(
+      :has(.planet-grid:has(.project-card--ar-mask:nth-child(2):last-child))
+    )::-webkit-scrollbar-thumb {
     background: rgba(159, 229, 255, 0.45);
     border-radius: 999px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .planet-btn-ring,
+  .planet-btn-body {
+    animation: none;
+  }
+
+  .planet-panel-back-btn .planet-panel-back-btn__inner {
+    animation: none;
+  }
+
   .planet-panel,
   .planet-panel::after,
   .project-card {

@@ -1,12 +1,15 @@
 @import 'tailwindcss';
 
 html {
-  scrollbar-gutter: stable;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
   margin: 0;
   min-width: 0;
+  height: 100%;
+  overflow: hidden;
   background: linear-gradient(
     180deg,
     #1a2233 0%,
@@ -28,4 +31,5 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   height: 100dvh;
+  overflow: hidden;
 }

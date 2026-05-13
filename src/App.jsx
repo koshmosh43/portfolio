@@ -1,4 +1,4 @@
-import { lazy, Suspense, startTransition, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { GalaxyIntroCurtain } from './GalaxyIntroCurtain'
 import { WelcomeHero } from './WelcomeHero'
 import { usePortfolioFlow } from './features/portfolio/portfolioFlow'
@@ -19,6 +19,18 @@ const PortfolioShowcasePanel = lazy(() =>
     default: m.PlanetShowcasePanel,
   })),
 )
+
+function estimateShowcaseHydrationWeight(showcase) {
+  if (!showcase?.projects?.length) return 0
+  let score = 0
+  for (const project of showcase.projects) {
+    score += project?.videoUrl ? 1.15 : 0.35
+    const shots = Array.isArray(project?.screenshots) ? project.screenshots.length : 0
+    score += shots * 0.24
+    if (shots >= 2 && shots <= 4) score += 0.5
+  }
+  return score
+}
 
 export default function App() {
   const [welcomeVisibleCount, setWelcomeVisibleCount] = useState(WELCOME_TOTAL_CHARS)
@@ -110,6 +122,15 @@ export default function App() {
   )
   const backToGalaxy = portfolio.onBackToGalaxy
 
+  const activeShowcase = useMemo(
+    () => (portfolio.activePlanetId ? portfolioProjects[portfolio.activePlanetId] ?? null : null),
+    [portfolio.activePlanetId],
+  )
+  const panelHydrationWeight = useMemo(
+    () => estimateShowcaseHydrationWeight(activeShowcase),
+    [activeShowcase],
+  )
+
   useEffect(() => {
     if (!portfolio.activePlanetId) return
     if (sunJokeTimerRef.current) {
@@ -144,8 +165,8 @@ export default function App() {
       setPanelMediaPlanetId(null)
       return
     }
-    const shellDelayMs = prefersReducedMotion ? 0 : 420
-    const mediaDelayMs = prefersReducedMotion ? 0 : 1180
+    const shellDelayMs = prefersReducedMotion ? 0 : Math.round(620 + Math.min(420, panelHydrationWeight * 48))
+    const mediaDelayMs = prefersReducedMotion ? 0 : shellDelayMs + Math.round(760 + Math.min(720, panelHydrationWeight * 120))
     setPanelMediaPlanetId(null)
     panelMountTimerRef.current = window.setTimeout(() => {
       panelMountTimerRef.current = 0
@@ -157,7 +178,7 @@ export default function App() {
         setPanelMediaPlanetId(portfolio.activePlanetId)
       })
     }, mediaDelayMs)
-  }, [portfolio.activePlanetId, prefersReducedMotion])
+  }, [panelHydrationWeight, portfolio.activePlanetId, prefersReducedMotion])
 
   const onBackToGalaxy = useCallback(() => {
     requestAnimationFrame(() => {
@@ -226,6 +247,7 @@ export default function App() {
       {panelShowcase ? (
         <Suspense fallback={null}>
           <PortfolioShowcasePanel
+            planetPanelId={panelPlanetId}
             showcase={panelShowcase}
             onBack={onBackToGalaxy}
             enableMedia={panelMediaPlanetId === panelPlanetId}

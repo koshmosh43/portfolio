@@ -78,8 +78,9 @@ const FOCUS_OFFSETS_DESKTOP = Object.freeze({
       pilotStickerScaleMul: 0.8,
       pilotStickerOffsetX: 0.2,
       pilotStickerOffsetY: 0,
-      shipNeonLightMul: 0.22,
-      shipGlassLightMul: 0.2,
+      /* FinTech approach: keep neon readable; cockpit glass film + rim need full drive (was 0.22 / 0.2 → dead glass). */
+      shipNeonLightMul: 0.62,
+      shipGlassLightMul: 1.02,
       pilotStickerOffsetZ: 0.1,
     },
   },
@@ -279,21 +280,30 @@ function createProfile(viewport) {
   const width = viewport?.width ?? 1440
   const height = viewport?.height ?? 900
   const aspect = viewport?.aspect ?? width / height
+  const shortEdge = Math.min(width, height)
   const mobile = width < 700 || aspect < 0.78
   const isPortrait = aspect < 1
   const tablet = !mobile && isPortrait
   const isPortraitMobileTablet = mobile || tablet
+  /** Wide CSS width but still a phone (short edge); was misclassified as desktop → planet fills GL. */
+  const isPhoneLandscape = !isPortrait && shortEdge <= 500
   const focusCameraMulDesktop = mobile ? 1.16 : tablet ? 1.08 : 1
   const focusCameraMulPortrait = 1
+  const focusCameraMulPhoneLandscape = 1.38
 
   return {
     aspect,
     device: mobile ? 'mobile' : tablet ? 'tablet' : 'desktop',
-    edgePad: mobile ? 0.2 : tablet ? 0.14 : 0.1,
+    edgePad: mobile || isPhoneLandscape ? 0.2 : tablet ? 0.14 : 0.1,
     isPortraitMobileTablet,
-    focusCameraMul: isPortraitMobileTablet ? focusCameraMulPortrait : focusCameraMulDesktop,
-    planetScale: mobile ? 0.78 : tablet ? 0.9 : 1,
-    sunScale: mobile ? 0.72 : tablet ? 0.86 : 1,
+    isPhoneLandscape,
+    focusCameraMul: isPortraitMobileTablet
+      ? focusCameraMulPortrait
+      : isPhoneLandscape
+        ? focusCameraMulPhoneLandscape
+        : focusCameraMulDesktop,
+    planetScale: isPhoneLandscape ? 0.82 : mobile ? 0.78 : tablet ? 0.9 : 1,
+    sunScale: isPhoneLandscape ? 0.74 : mobile ? 0.72 : tablet ? 0.86 : 1,
   }
 }
 

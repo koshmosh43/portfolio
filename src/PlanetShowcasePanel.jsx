@@ -38,11 +38,12 @@ function googleDriveVideoPosterUrl(fileId) {
 }
 
 /** Pause when off-screen — AR screen captures are heavy when two decode concurrently. */
-function DeckHtmlVideo({ title, preload = 'none', src, poster, ...videoProps }) {
-  const videoRef = useRef(null)
+function DeckHtmlVideo({ title, preload = 'none', src, poster, videoRef, ...videoProps }) {
+  const localVideoRef = useRef(null)
+  const ref = videoRef ?? localVideoRef
 
   useEffect(() => {
-    const el = videoRef.current
+    const el = ref.current
     if (!el) return undefined
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -52,11 +53,11 @@ function DeckHtmlVideo({ title, preload = 'none', src, poster, ...videoProps }) 
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [src])
+  }, [ref, src])
 
   return (
     <video
-      ref={videoRef}
+      ref={ref}
       src={src}
       poster={poster}
       playsInline
@@ -71,40 +72,83 @@ function DeckHtmlVideo({ title, preload = 'none', src, poster, ...videoProps }) 
 function GoogleDriveProjectVideo({ fileId, title }) {
   const [streamIndex, setStreamIndex] = useState(0)
   const [useIframe, setUseIframe] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [frameReady, setFrameReady] = useState(false)
+  const videoRef = useRef(null)
   const candidates = googleDriveStreamCandidates(fileId)
+
+  useEffect(() => {
+    setFrameReady(false)
+  }, [fileId, streamIndex, useIframe])
+
+  const markFrameReady = useCallback(() => {
+    setFrameReady(true)
+  }, [])
+
+  const onDrivePlayToggle = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused || video.ended) {
+      void video.play().catch(() => {})
+      return
+    }
+    video.pause()
+  }, [])
 
   if (useIframe) {
     return (
-      <iframe
-        className="project-video-embed"
-        src={googleDrivePreviewIframeUrl(fileId)}
-        title={title}
-        loading="lazy"
-        allow="autoplay; fullscreen"
-      />
+      <ProjectMediaSlot title={title} ready={frameReady}>
+        <iframe
+          className="project-video-embed"
+          src={googleDrivePreviewIframeUrl(fileId)}
+          title={title}
+          loading="lazy"
+          allow="autoplay; fullscreen"
+          onLoad={markFrameReady}
+        />
+      </ProjectMediaSlot>
     )
   }
 
   const src = candidates[Math.min(streamIndex, candidates.length - 1)]
   const poster = googleDriveVideoPosterUrl(fileId)
+
   return (
-    <DeckHtmlVideo
-      key={src}
-      src={src}
-      poster={poster}
-      title={title}
-      controls
-      disablePictureInPicture
-      muted
-      loop
-      preload="metadata"
-      referrerPolicy="no-referrer"
-      {...{ 'x-webkit-airplay': 'deny' }}
-      onError={() => {
-        if (streamIndex + 1 < candidates.length) setStreamIndex((i) => i + 1)
-        else setUseIframe(true)
-      }}
-    />
+    <ProjectMediaSlot title={title} ready={frameReady}>
+      <div className="project-drive-video-shell">
+        <DeckHtmlVideo
+          key={src}
+          videoRef={videoRef}
+          src={src}
+          poster={poster}
+          title={title}
+          controls
+          disablePictureInPicture
+          muted
+          loop
+          preload="metadata"
+          referrerPolicy="no-referrer"
+          {...{ 'x-webkit-airplay': 'deny' }}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          onLoadedData={markFrameReady}
+          onCanPlay={markFrameReady}
+          onError={() => {
+            if (streamIndex + 1 < candidates.length) setStreamIndex((i) => i + 1)
+            else setUseIframe(true)
+          }}
+        />
+        <button
+          type="button"
+          className={`project-drive-play-toggle ${isPlaying ? 'is-hidden' : ''}`}
+          aria-label={`Play ${title}`}
+          onClick={onDrivePlayToggle}
+        >
+          <span aria-hidden>▶</span>
+        </button>
+      </div>
+    </ProjectMediaSlot>
   )
 }
 
@@ -146,53 +190,144 @@ function getYoutubeEmbedUrl(url) {
   }
 }
 
-function ProjectVideoPlaceholder({ title, poster }) {
-  return poster ? (
-    <img className="project-video-poster" src={poster} alt="" loading="lazy" decoding="async" />
-  ) : (
-    <div className="project-video-placeholder" aria-hidden>
-      <span>{title}</span>
+function ProjectVideoPlaceholder({ title, bare = false }) {
+  return (
+    <div className={`project-video-placeholder${bare ? ' project-video-placeholder--bare' : ''}`} aria-hidden>
+      {!bare ? <span>{title}</span> : null}
     </div>
   )
 }
 
-function ProjectVideo({ src, title, mediaReady }) {
+/** Same rim + AR-style skeleton as screenshots; fades out when `ready`. */
+function ProjectMediaSlot({ title, ready, children }) {
+  return (
+    <div className="project-media-slot">
+      {!ready ? <ProjectVideoPlaceholder title={title} bare /> : null}
+      <div className={`project-media-slot__track${ready ? ' is-ready' : ''}`}>{children}</div>
+    </div>
+  )
+}
+
+function previewBrandFromHref(href, explicit) {
+  if (explicit) return explicit
+  if (!href) return 'Preview'
+  try {
+    const host = new URL(href).hostname.replace(/^www\./, '')
+    if (host.includes('pearfiction.com')) return 'Pear Fiction'
+    if (host.includes('room8studio.com') || host.includes('room8group.com')) return 'Room 8'
+    if (host === 'youtube.com' || host === 'youtu.be' || host === 'm.youtube.com') return 'Gameplay'
+    return 'Preview'
+  } catch {
+    return 'Preview'
+  }
+}
+
+/** Studio key art — avoids age-gated / broken embeds while staying on-brand. */
+function ProjectStudioPreview({ imageSrc, href, brand, title }) {
+  const [imgReady, setImgReady] = useState(false)
+  const label = `${title} — ${brand}`
+
+  useEffect(() => {
+    setImgReady(false)
+  }, [imageSrc])
+
+  return (
+    <ProjectMediaSlot title={title} ready={imgReady}>
+      <a
+        className="project-studio-preview"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={label}
+      >
+        <img
+          src={imageSrc}
+          alt=""
+          decoding="async"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onLoad={() => setImgReady(true)}
+          onError={() => setImgReady(true)}
+        />
+        <span className="project-studio-preview__shine" aria-hidden />
+        <span className="project-studio-preview__meta">
+          <span className="project-studio-preview__brand">{brand}</span>
+          <span className="project-studio-preview__open" aria-hidden>
+            ↗
+          </span>
+        </span>
+      </a>
+    </ProjectMediaSlot>
+  )
+}
+
+function YoutubeProjectIframe({ embedUrl, title }) {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    setReady(false)
+  }, [embedUrl])
+
+  return (
+    <ProjectMediaSlot title={title} ready={ready}>
+      <iframe
+        className="project-video-embed"
+        src={embedUrl}
+        title={title}
+        loading="lazy"
+        onLoad={() => setReady(true)}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+      />
+    </ProjectMediaSlot>
+  )
+}
+
+function ProjectVideo({ src, title, mediaReady, portfolioPreviewSrc, portfolioPreviewHref, portfolioPreviewBrand }) {
+  if (portfolioPreviewSrc) {
+    if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
+    const href = portfolioPreviewHref || src || 'https://pearfiction.com/games/'
+    const brand = previewBrandFromHref(href, portfolioPreviewBrand)
+    return <ProjectStudioPreview imageSrc={portfolioPreviewSrc} href={href} brand={brand} title={title} />
+  }
   const driveFileId = getGoogleDriveFileId(src)
   if (driveFileId) {
-    if (!mediaReady) {
-      return <ProjectVideoPlaceholder title={title} poster={googleDriveVideoPosterUrl(driveFileId)} />
-    }
+    if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
     return <GoogleDriveProjectVideo fileId={driveFileId} title={title} />
   }
   const youtubeEmbedUrl = getYoutubeEmbedUrl(src)
   if (youtubeEmbedUrl) {
-    if (!mediaReady) {
-      const videoId = youtubeEmbedUrl.match(/\/embed\/([^?]+)/)?.[1]
-      const poster = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null
-      return <ProjectVideoPlaceholder title={title} poster={poster} />
-    }
-    return (
-      <iframe
-        className="project-video-embed"
-        src={youtubeEmbedUrl}
-        title={title}
-        loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-      />
-    )
+    if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
+    return <YoutubeProjectIframe embedUrl={youtubeEmbedUrl} title={title} />
   }
-  if (!mediaReady) return <ProjectVideoPlaceholder title={title} poster={null} />
+  if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
   return (
-    <DeckHtmlVideo
-      src={src}
-      title={title}
-      controls
-      disablePictureInPicture
-      muted
-      loop
-      preload="none"
-      {...{ 'x-webkit-airplay': 'deny' }}
-    />
+    <HtmlVideoWithSkeleton src={src} title={title} />
+  )
+}
+
+function HtmlVideoWithSkeleton({ src, title }) {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    setReady(false)
+  }, [src])
+
+  return (
+    <ProjectMediaSlot title={title} ready={ready}>
+      <DeckHtmlVideo
+        src={src}
+        title={title}
+        controls
+        disablePictureInPicture
+        muted
+        loop
+        preload="none"
+        onLoadedData={() => setReady(true)}
+        onCanPlay={() => setReady(true)}
+        onError={() => setReady(true)}
+        {...{ 'x-webkit-airplay': 'deny' }}
+      />
+    </ProjectMediaSlot>
   )
 }
 
@@ -479,15 +614,15 @@ function ArShotLightbox({ lightbox, onClosed }) {
         <div ref={frameRef} className="image-lightbox-frame">
           {imgFailed ? (
             <div className="image-lightbox-fallback">
-              <p>Не вдалося завантажити прев’ю з Google Drive.</p>
-              <p className="image-lightbox-fallback-hint">Перевір доступ «Anyone with the link», або відкрий файл напряму.</p>
+              <p>Не вдалося завантажити зображення.</p>
+              <p className="image-lightbox-fallback-hint">Спробуй інше посилання або відкрий файл у новій вкладці.</p>
               <a
                 href={lightbox.viewUrl ?? lightbox.fullSrc}
                 target="_blank"
                 rel="noreferrer"
                 onClick={(e) => e.stopPropagation()}
               >
-                Відкрити в Drive
+                Відкрити оригінал
               </a>
             </div>
           ) : null}
@@ -511,10 +646,16 @@ function ArShotLightbox({ lightbox, onClosed }) {
   )
 }
 
-function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false }) {
+function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, enableMedia = false }) {
   const gridRef = useRef(null)
   const [shotLightbox, setShotLightbox] = useState(null)
   const [mediaReady, setMediaReady] = useState(false)
+  const [carouselNav, setCarouselNav] = useState({
+    touch: false,
+    overflow: false,
+    canPrev: false,
+    canNext: false,
+  })
   const preloadedShotsRef = useRef(new Set())
   const onCardAmbientMove = useAmbientGlowPointer()
   usePlanetPanelExclusiveVideoPlayback()
@@ -524,19 +665,38 @@ function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false })
       setMediaReady(false)
       return undefined
     }
+    let cancelled = false
     let idleId = 0
     let timeoutId = 0
-    const arm = () => {
+
+    const commit = () => {
+      if (cancelled) return
       requestAnimationFrame(() => {
-        setMediaReady(true)
+        if (cancelled) return
+        requestAnimationFrame(() => {
+          if (!cancelled) setMediaReady(true)
+        })
       })
     }
-    if (typeof window.requestIdleCallback === 'function') {
-      idleId = window.requestIdleCallback(arm, { timeout: 800 })
-      return () => window.cancelIdleCallback(idleId)
+
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      commit()
+      return () => {
+        cancelled = true
+      }
     }
-    timeoutId = window.setTimeout(arm, 120)
-    return () => window.clearTimeout(timeoutId)
+
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(commit, { timeout: 280 })
+    } else {
+      timeoutId = window.setTimeout(commit, 48)
+    }
+
+    return () => {
+      cancelled = true
+      if (idleId) window.cancelIdleCallback(idleId)
+      if (timeoutId) window.clearTimeout(timeoutId)
+    }
   }, [enableMedia, showcase])
 
   const preloadShot = useCallback((viewUrl) => {
@@ -555,13 +715,24 @@ function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false })
     const grid = gridRef.current
     if (
       !grid ||
+      !mediaReady ||
       !showcase.carousel ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     )
       return undefined
 
     let tween = null
+    const touchUiMq =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(hover: none), (pointer: coarse)')
+        : { matches: false, addEventListener: () => {}, removeEventListener: () => {} }
+
     const startCarousel = () => {
+      if (touchUiMq.matches) {
+        tween?.kill()
+        tween = null
+        return
+      }
       const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth)
       if (maxScroll < 24) return
       tween?.kill()
@@ -580,16 +751,63 @@ function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false })
     grid.addEventListener('pointerenter', onEnter)
     grid.addEventListener('pointerleave', onLeave)
     window.addEventListener('resize', startCarousel)
+    touchUiMq.addEventListener('change', startCarousel)
 
     return () => {
       window.removeEventListener('resize', startCarousel)
+      touchUiMq.removeEventListener('change', startCarousel)
       grid.removeEventListener('pointerenter', onEnter)
       grid.removeEventListener('pointerleave', onLeave)
       tween?.kill()
     }
-  }, [showcase])
+  }, [mediaReady, showcase])
 
   useEffect(() => {
+    const grid = gridRef.current
+    if (!grid || !showcase.carousel || !mediaReady) {
+      setCarouselNav({ touch: false, overflow: false, canPrev: false, canNext: false })
+      return undefined
+    }
+
+    const touchUiMq =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(hover: none), (pointer: coarse)')
+        : { matches: false, addEventListener: () => {}, removeEventListener: () => {} }
+
+    const updateNav = () => {
+      const touch = touchUiMq.matches
+      const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth)
+      const overflow = maxScroll > 8
+      const sl = grid.scrollLeft
+      const canPrev = overflow && sl > 6
+      const canNext = overflow && sl < maxScroll - 6
+      setCarouselNav({ touch, overflow, canPrev, canNext })
+    }
+
+    updateNav()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateNav) : null
+    ro?.observe(grid)
+    grid.addEventListener('scroll', updateNav, { passive: true })
+    window.addEventListener('resize', updateNav)
+    touchUiMq.addEventListener('change', updateNav)
+
+    return () => {
+      ro?.disconnect()
+      grid.removeEventListener('scroll', updateNav)
+      window.removeEventListener('resize', updateNav)
+      touchUiMq.removeEventListener('change', updateNav)
+    }
+  }, [mediaReady, showcase.carousel, showcase.projects.length])
+
+  const scrollCarouselBy = useCallback((dir) => {
+    const grid = gridRef.current
+    if (!grid) return
+    const step = Math.max(140, Math.round(grid.clientWidth * 0.72))
+    grid.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    if (!mediaReady) return undefined
     const warmup = () => {
       const urls = showcase.projects
         .flatMap((project) => (Array.isArray(project.screenshots) ? project.screenshots : []))
@@ -602,32 +820,36 @@ function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false })
     }
     const timer = window.setTimeout(warmup, 250)
     return () => window.clearTimeout(timer)
-  }, [preloadShot, showcase])
+  }, [mediaReady, preloadShot, showcase])
 
-  return (
-    <section className="planet-panel">
-      {shotLightbox ? (
-        <ArShotLightbox lightbox={shotLightbox} onClosed={() => setShotLightbox(null)} />
-      ) : null}
-      <PanelHeader
-        title={showcase.title}
-        subtitle={showcase.subtitle}
-        actionLabel="Back to galaxy"
-        onAction={onBack}
-      />
-      <div className="planet-grid" ref={gridRef}>
-        {showcase.projects.map((project) => {
-          const shotCount = Array.isArray(project.screenshots) ? project.screenshots.length : 0
-          const isArMaskCard = shotCount >= 2 && shotCount <= 4
-          return (
-            <article
-              className={`project-card ambient-glow-frame ambient-glow-frame--subtle${
-                isArMaskCard ? ' project-card--ar-mask' : ''
-              }`}
-              key={project.title}
-              onPointerMove={onCardAmbientMove}
-            >
-              <div className="project-card__ambient-inner">
+  const isArShowcase =
+    showcase.projects.length > 0 &&
+    showcase.projects.every((p) => {
+      const n = Array.isArray(p.screenshots) ? p.screenshots.length : 0
+      return n >= 1 && n <= 4
+    })
+
+  const gridClass = `planet-grid${isArShowcase ? ' planet-grid--ar-showcase' : ''}`.trim()
+  const gridAria =
+    showcase.carousel && carouselNav.touch && carouselNav.overflow
+      ? 'Game projects. Swipe horizontally or use side arrows to browse.'
+      : undefined
+  const showCarouselArrows = showcase.carousel && carouselNav.touch && carouselNav.overflow
+
+  const projectGrid = (
+    <div ref={gridRef} className={gridClass} aria-label={gridAria}>
+      {showcase.projects.map((project) => {
+        const shotCount = Array.isArray(project.screenshots) ? project.screenshots.length : 0
+        const isArMaskCard = shotCount >= 1 && shotCount <= 4
+        return (
+          <article
+            className={`project-card ambient-glow-frame ambient-glow-frame--subtle${
+              isArMaskCard ? ' project-card--ar-mask' : ''
+            }`}
+            key={project.title}
+            onPointerMove={onCardAmbientMove}
+          >
+            <div className="project-card__ambient-inner">
               {isArMaskCard ? (
                 <div
                   className="project-card-ar-layout"
@@ -640,46 +862,70 @@ function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false })
                       : { '--ar-video-w': 9, '--ar-video-h': 16 }
                   }
                 >
-                  <div
-                    className="project-card-preview project-card-preview--ar"
-                  >
-                    <ProjectVideo src={project.videoUrl} title={project.title} mediaReady={mediaReady} />
+                  <div className="project-card-preview project-card-preview--ar">
+                    <ProjectVideo
+                      src={project.videoUrl}
+                      title={project.title}
+                      mediaReady={mediaReady}
+                      portfolioPreviewSrc={project.portfolioPreviewSrc}
+                      portfolioPreviewHref={project.portfolioPreviewHref ?? project.linkUrl}
+                      portfolioPreviewBrand={project.portfolioPreviewBrand}
+                    />
                   </div>
                   <div
-                    className={`project-card-screenshots${shotCount === 2 ? ' project-card-screenshots--pair' : ''}`}
+                    className={`project-card-screenshots${shotCount === 2 ? ' project-card-screenshots--pair' : shotCount === 1 ? ' project-card-screenshots--single' : ''}`}
                     role="list"
                     aria-label="Mask screenshots"
                   >
-                    {project.screenshots.map((url, i) => (
-                      <button
-                        key={`${project.title}-shot-${i}`}
-                        type="button"
-                        className="project-card-shot"
-                        role="listitem"
-                        aria-label={`${project.title} — enlarge screenshot ${i + 1} of ${shotCount}`}
-                        onClick={() =>
-                          setShotLightbox({
-                            fullSrc: getGoogleDriveFullImageUrl(url),
-                            viewUrl: url,
-                            alt: `${project.title} — screenshot ${i + 1} of ${shotCount}`,
-                          })
-                        }
-                        onPointerEnter={() => preloadShot(url)}
-                        onFocus={() => preloadShot(url)}
-                      >
-                        <img
-                          src={getGoogleDriveThumbnailUrl(url)}
-                          alt=""
-                          loading="lazy"
-                          referrerPolicy="no-referrer"
-                        />
-                      </button>
-                    ))}
+                    {project.screenshots.map((url, i) => {
+                      if (!mediaReady) {
+                        return (
+                          <div
+                            key={`${project.title}-shot-${i}`}
+                            className="project-card-shot project-card-shot--placeholder"
+                            role="listitem"
+                            aria-hidden
+                          />
+                        )
+                      }
+                      return (
+                        <button
+                          key={`${project.title}-shot-${i}`}
+                          type="button"
+                          className="project-card-shot"
+                          role="listitem"
+                          aria-label={`${project.title} — enlarge screenshot ${i + 1} of ${shotCount}`}
+                          onClick={() =>
+                            setShotLightbox({
+                              fullSrc: getGoogleDriveFullImageUrl(url),
+                              viewUrl: url,
+                              alt: `${project.title} — screenshot ${i + 1} of ${shotCount}`,
+                            })
+                          }
+                          onPointerEnter={() => preloadShot(url)}
+                          onFocus={() => preloadShot(url)}
+                        >
+                          <img
+                            src={getGoogleDriveThumbnailUrl(url)}
+                            alt=""
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                          />
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               ) : (
                 <div className="project-card-preview">
-                  <ProjectVideo src={project.videoUrl} title={project.title} mediaReady={mediaReady} />
+                  <ProjectVideo
+                    src={project.videoUrl}
+                    title={project.title}
+                    mediaReady={mediaReady}
+                    portfolioPreviewSrc={project.portfolioPreviewSrc}
+                    portfolioPreviewHref={project.portfolioPreviewHref ?? project.linkUrl}
+                    portfolioPreviewBrand={project.portfolioPreviewBrand}
+                  />
                 </div>
               )}
               <h4>{project.title}</h4>
@@ -689,11 +935,77 @@ function PlanetShowcasePanelComponent({ showcase, onBack, enableMedia = false })
                   {project.linkLabel ?? project.linkUrl}
                 </ExternalLink>
               ) : null}
-              </div>
-            </article>
-          )
-        })}
-      </div>
+            </div>
+          </article>
+        )
+      })}
+    </div>
+  )
+
+  return (
+    <section
+      className={`planet-panel ${mediaReady ? '' : 'planet-panel--lite'} ${showcase.mediaScale === 'large' ? 'planet-panel--large-media' : ''}${
+        planetPanelId ? ` planet-panel--${planetPanelId}` : ''
+      }`.trim()}
+    >
+      {shotLightbox ? (
+        <ArShotLightbox lightbox={shotLightbox} onClosed={() => setShotLightbox(null)} />
+      ) : null}
+      <PanelHeader
+        title={showcase.title}
+        subtitle={showcase.subtitle}
+        actionLabel="Back to galaxy"
+        onAction={onBack}
+      />
+      {showcase.carousel ? (
+        <div className="planet-panel-carousel-shell">
+          {showCarouselArrows ? (
+            <>
+              <button
+                type="button"
+                className={`planet-carousel-nav planet-carousel-nav--prev${carouselNav.canPrev ? '' : ' is-disabled'}`}
+                aria-label="Previous projects"
+                aria-disabled={!carouselNav.canPrev}
+                disabled={!carouselNav.canPrev}
+                onClick={() => scrollCarouselBy(-1)}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+                  <path
+                    d="M14 7 L9 12 L14 17"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.25"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className={`planet-carousel-nav planet-carousel-nav--next${carouselNav.canNext ? '' : ' is-disabled'}`}
+                aria-label="Next projects"
+                aria-disabled={!carouselNav.canNext}
+                disabled={!carouselNav.canNext}
+                onClick={() => scrollCarouselBy(1)}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+                  <path
+                    d="M10 7 L15 12 L10 17"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.25"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </>
+          ) : null}
+          {projectGrid}
+        </div>
+      ) : (
+        projectGrid
+      )}
     </section>
   )
 }
