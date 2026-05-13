@@ -19,7 +19,7 @@ export const portfolioProjects = Object.freeze({
   },
   planetC: {
     title: 'Playable Ads Planet',
-    subtitle: 'Interactive ad formats, playable prototypes, and polished micro-experiences',
+    subtitle: 'PixiJS · GSAP · WebGL · Basisu',
     mediaScale: 'large',
     projects: [
       {
@@ -41,7 +41,7 @@ export const portfolioProjects = Object.freeze({
   },
   planetD: {
     title: 'SaaS Planet',
-    subtitle: 'Cloud products, subscriptions, and scalable web platforms',
+    subtitle: 'iGaming, EdTech & eSports platforms',
     projects: [
       {
         title: 'ESports: Keydrop',
@@ -69,6 +69,8 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=YTEwIgTyDJ8',
         linkUrl: 'https://www.williamhill.com/',
         linkLabel: 'williamhill.com',
+        portfolioPreviewSrc: 'https://i.ytimg.com/vi/YTEwIgTyDJ8/hqdefault.jpg',
+        portfolioPreviewBrand: 'William Hill',
       },
       {
         title: 'Mr Green',
@@ -112,8 +114,8 @@ export const portfolioProjects = Object.freeze({
     ],
   },
   planetB: {
-    title: 'Game Planet: My PixiJS Games',
-    subtitle: '',
+    title: 'Game Planet',
+    subtitle: 'React · PixiJS · GSAP · WebGL · ThreeJS · GSAP',
     carousel: true,
     projects: [
       {
@@ -122,8 +124,6 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=dtBFdLOv-XI',
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
-        portfolioPreviewSrc: 'https://i.ytimg.com/vi/dtBFdLOv-XI/hqdefault.jpg',
-        portfolioPreviewBrand: 'Room 8 · Zeerpay',
       },
       {
         title: 'Fart Jump Space',
@@ -131,8 +131,6 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
-        portfolioPreviewSrc: 'https://drive.google.com/thumbnail?id=1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw&sz=w1200',
-        portfolioPreviewBrand: 'Room 8 · Zeerpay',
       },
       {
         title: 'Pots-o-Loot',
@@ -160,7 +158,7 @@ export const portfolioProjects = Object.freeze({
       },
       {
         title: 'Bunny Loot',
-        description: 'Brace yourselves, players—Bunny Loot™ is on the loose! Chaos, carrots, and colossal wins await at every hop.',
+        description: 'Brace yourselves, players - Bunny Loot is on the loose! Chaos, carrots, and colossal wins await at every hop.',
         videoUrl: 'https://youtu.be/Uu620kJ-l9o?si=t2dkbcr4qNSDm11l',
         linkUrl: 'https://pearfiction.com/games/bunny-loot/',
         linkLabel: 'Game details',
@@ -172,8 +170,6 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=YDPTVYz6uhA',
         linkUrl: 'https://slot.day/playtech/wild-lava/',
         linkLabel: 'Game details',
-        portfolioPreviewSrc: 'https://i.ytimg.com/vi/YDPTVYz6uhA/hqdefault.jpg',
-        portfolioPreviewBrand: 'Playtech',
       },
       {
         title: 'Egypt Slot Game',

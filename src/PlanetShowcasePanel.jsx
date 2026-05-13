@@ -282,11 +282,21 @@ function YoutubeProjectIframe({ embedUrl, title }) {
   )
 }
 
+/** Floating brand pill rendered on top of any media slot (video/iframe/preview). */
+function ProjectPreviewBrand({ brand }) {
+  if (!brand) return null
+  return (
+    <span className="project-studio-preview__brand project-studio-preview__brand--floating">
+      {brand}
+    </span>
+  )
+}
+
 function ProjectVideo({ src, title, mediaReady, portfolioPreviewSrc, portfolioPreviewHref, portfolioPreviewBrand }) {
   if (portfolioPreviewSrc) {
     if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
-    const href = portfolioPreviewHref || src || 'https://pearfiction.com/games/'
-    const brand = previewBrandFromHref(href, portfolioPreviewBrand)
+    const href = src || portfolioPreviewHref || 'https://pearfiction.com/games/'
+    const brand = previewBrandFromHref(portfolioPreviewHref || src, portfolioPreviewBrand)
     return <ProjectStudioPreview imageSrc={portfolioPreviewSrc} href={href} brand={brand} title={title} />
   }
   const driveFileId = getGoogleDriveFileId(src)
@@ -926,6 +936,9 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
                     portfolioPreviewHref={project.portfolioPreviewHref ?? project.linkUrl}
                     portfolioPreviewBrand={project.portfolioPreviewBrand}
                   />
+                  {!project.portfolioPreviewSrc && project.portfolioPreviewBrand && mediaReady ? (
+                    <ProjectPreviewBrand brand={project.portfolioPreviewBrand} />
+                  ) : null}
                 </div>
               )}
               <h4>{project.title}</h4>

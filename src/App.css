@@ -1602,35 +1602,6 @@ h2 {
   margin-bottom: 6px;
 }
 
-.planet-panel.planet-panel--lite .planet-panel-head::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  border-radius: 2px;
-  overflow: hidden;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--pf-b) 28%, transparent),
-    color-mix(in srgb, var(--pf-a) 55%, transparent),
-    color-mix(in srgb, var(--pf-b) 32%, transparent),
-    color-mix(in srgb, var(--pf-a) 40%, transparent)
-  );
-  background-size: 220% 100%;
-  opacity: 0.85;
-  animation: planet-panel-media-prime 1.05s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .planet-panel.planet-panel--lite .planet-panel-head::after {
-    animation: none;
-    background-size: 100% 100%;
-    opacity: 0.7;
-  }
-}
-
 @keyframes planet-panel-media-prime {
   0% {
     background-position: 0% 0%;
@@ -1644,6 +1615,25 @@ h2 {
   position: relative;
   min-width: 0;
   padding-left: 13px;
+}
+
+.planet-panel-head > div:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.18em;
+  bottom: 0.32em;
+  width: 2.5px;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    var(--pf-a) 0%,
+    color-mix(in srgb, var(--pf-a) 62%, var(--pf-b)) 48%,
+    var(--pf-b) 100%
+  );
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--pf-a) 38%, transparent),
+    0 0 14px color-mix(in srgb, var(--pf-b) 28%, transparent);
 }
 
 .planet-panel h3 {
@@ -1676,6 +1666,12 @@ h2 {
   line-height: 1.45;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--pf-a) 85%, rgba(255,255,255,0.6));
+}
+
+@media (max-width: 500px) {
+  .planet-panel-head p {
+    max-width: none;
+  }
 }
 
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
@@ -2323,6 +2319,7 @@ h2 {
 }
 
 .project-card-preview {
+  position: relative;
   width: 100%;
 }
 
@@ -2554,6 +2551,14 @@ h2 {
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.35),
     0 6px 18px rgba(0, 0, 0, 0.42);
+}
+
+.project-studio-preview__brand--floating {
+  position: absolute;
+  z-index: 4;
+  left: 10px;
+  bottom: 10px;
+  pointer-events: none;
 }
 
 .project-studio-preview__open {
