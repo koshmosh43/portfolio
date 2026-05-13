@@ -1819,57 +1819,65 @@ h2 {
   z-index: 6;
   top: 50%;
   transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   padding: 0;
   margin: 0;
   display: grid;
   place-items: center;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--pf-a) 38%, rgba(255, 255, 255, 0.18));
+  border-radius: 10px;
+  border: 1px solid transparent;
   background:
     linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--pf-a) 14%, rgba(8, 10, 22, 0.92)),
-      color-mix(in srgb, var(--pf-b) 12%, rgba(6, 14, 18, 0.9))
-    );
-  color: color-mix(in srgb, var(--pf-a) 72%, #fff);
+      155deg,
+      color-mix(in srgb, var(--pf-a) 12%, rgba(6, 8, 18, 0.88)),
+      color-mix(in srgb, var(--pf-b) 10%, rgba(4, 10, 14, 0.86))
+    ) padding-box,
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--pf-a) 52%, rgba(255, 255, 255, 0.18)),
+      color-mix(in srgb, var(--pf-b) 48%, rgba(255, 255, 255, 0.1))
+    ) border-box;
+  color: color-mix(in srgb, var(--pf-a) 78%, #fff);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.45),
-    0 0 22px color-mix(in srgb, var(--pf-a) 22%, transparent),
-    0 0 18px color-mix(in srgb, var(--pf-b) 18%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--pf-a) 22%, rgba(255, 255, 255, 0.12));
-  transition: transform 0.18s ease, box-shadow 0.22s ease, opacity 0.22s ease;
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 18px color-mix(in srgb, var(--pf-a) 18%, transparent),
+    0 0 14px color-mix(in srgb, var(--pf-b) 14%, transparent);
+  transition: transform 0.18s ease, box-shadow 0.22s ease, opacity 0.22s ease, background 0.22s ease;
 }
 
 .planet-carousel-nav--prev {
-  left: 6px;
+  left: -2px;
 }
 
 .planet-carousel-nav--next {
-  right: 6px;
+  right: -2px;
 }
 
 .planet-carousel-nav:active:not(.is-disabled) {
-  transform: translateY(-50%) scale(0.94);
+  transform: translateY(-50%) scale(0.9);
 }
 
 .planet-carousel-nav.is-disabled {
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: default;
   box-shadow: none;
+  backdrop-filter: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .planet-carousel-nav:hover:not(.is-disabled) {
+    transform: translateY(-50%) scale(1.08);
     box-shadow:
-      0 12px 32px rgba(0, 0, 0, 0.5),
-      0 0 28px color-mix(in srgb, var(--pf-a) 30%, transparent),
-      0 0 22px color-mix(in srgb, var(--pf-b) 22%, transparent),
-      inset 0 1px 0 color-mix(in srgb, var(--pf-a) 28%, rgba(255, 255, 255, 0.16));
+      0 12px 32px rgba(0, 0, 0, 0.55),
+      0 0 28px color-mix(in srgb, var(--pf-a) 32%, transparent),
+      0 0 22px color-mix(in srgb, var(--pf-b) 26%, transparent);
+    color: #fff;
   }
 }
 

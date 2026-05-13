@@ -982,15 +982,9 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
                 disabled={!carouselNav.canPrev}
                 onClick={() => scrollCarouselBy(-1)}
               >
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-                  <path
-                    d="M14 7 L9 12 L14 17"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.25"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+                  <path d="M15 6 L9 12 L15 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
+                  <path d="M11 6 L5 12 L11 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
               <button
@@ -1001,15 +995,9 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
                 disabled={!carouselNav.canNext}
                 onClick={() => scrollCarouselBy(1)}
               >
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-                  <path
-                    d="M10 7 L15 12 L10 17"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.25"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+                  <path d="M9 6 L15 12 L9 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
+                  <path d="M13 6 L19 12 L13 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </>

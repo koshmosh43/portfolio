@@ -42,6 +42,7 @@ export const portfolioProjects = Object.freeze({
   planetD: {
     title: 'SaaS Planet',
     subtitle: 'iGaming, EdTech & eSports platforms',
+    carousel: true,
     projects: [
       {
         title: 'ESports: Keydrop',
