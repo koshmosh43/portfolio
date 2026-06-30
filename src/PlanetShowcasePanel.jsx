@@ -69,7 +69,7 @@ function DeckHtmlVideo({ title, preload = 'none', src, poster, videoRef, ...vide
 }
 
 /** Drive `/preview` iframe lays out its own UI — it cannot be centered with CSS; prefer `<video>` + direct stream. */
-function GoogleDriveProjectVideo({ fileId, title }) {
+function GoogleDriveProjectVideo({ fileId, title, hideVideoControls = false }) {
   const [streamIndex, setStreamIndex] = useState(0)
   const [useIframe, setUseIframe] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -115,19 +115,26 @@ function GoogleDriveProjectVideo({ fileId, title }) {
 
   return (
     <ProjectMediaSlot title={title} ready={frameReady}>
-      <div className="project-drive-video-shell">
+      <div
+        className={`project-drive-video-shell project-drive-video-shell--center${
+          hideVideoControls ? ' project-drive-video-shell--no-controls' : ''
+        }`}
+      >
         <DeckHtmlVideo
           key={src}
           videoRef={videoRef}
           src={src}
           poster={poster}
           title={title}
-          controls
+          controls={hideVideoControls ? undefined : true}
           disablePictureInPicture
+          controlsList={hideVideoControls ? 'nodownload noplaybackrate nofullscreen' : undefined}
           muted
           loop
+          playsInline
           preload="metadata"
           referrerPolicy="no-referrer"
+          onClick={hideVideoControls ? onDrivePlayToggle : undefined}
           {...{ 'x-webkit-airplay': 'deny' }}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
@@ -292,7 +299,15 @@ function ProjectPreviewBrand({ brand }) {
   )
 }
 
-function ProjectVideo({ src, title, mediaReady, portfolioPreviewSrc, portfolioPreviewHref, portfolioPreviewBrand }) {
+function ProjectVideo({
+  src,
+  title,
+  mediaReady,
+  portfolioPreviewSrc,
+  portfolioPreviewHref,
+  portfolioPreviewBrand,
+  hideVideoControls = false,
+}) {
   if (portfolioPreviewSrc) {
     if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
     const href = src || portfolioPreviewHref || 'https://pearfiction.com/games/'
@@ -302,7 +317,7 @@ function ProjectVideo({ src, title, mediaReady, portfolioPreviewSrc, portfolioPr
   const driveFileId = getGoogleDriveFileId(src)
   if (driveFileId) {
     if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
-    return <GoogleDriveProjectVideo fileId={driveFileId} title={title} />
+    return <GoogleDriveProjectVideo fileId={driveFileId} title={title} hideVideoControls={hideVideoControls} />
   }
   const youtubeEmbedUrl = getYoutubeEmbedUrl(src)
   if (youtubeEmbedUrl) {
@@ -824,6 +839,7 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
                       portfolioPreviewSrc={project.portfolioPreviewSrc}
                       portfolioPreviewHref={project.portfolioPreviewHref ?? project.linkUrl}
                       portfolioPreviewBrand={project.portfolioPreviewBrand}
+                      hideVideoControls={project.hideVideoControls}
                     />
                   </div>
                   <div
@@ -879,6 +895,7 @@ function PlanetShowcasePanelComponent({ planetPanelId = null, showcase, onBack, 
                     portfolioPreviewSrc={project.portfolioPreviewSrc}
                     portfolioPreviewHref={project.portfolioPreviewHref ?? project.linkUrl}
                     portfolioPreviewBrand={project.portfolioPreviewBrand}
+                    hideVideoControls={project.hideVideoControls}
                   />
                   {!project.portfolioPreviewSrc && project.portfolioPreviewBrand && mediaReady ? (
                     <ProjectPreviewBrand brand={project.portfolioPreviewBrand} />

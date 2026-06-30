@@ -2387,7 +2387,8 @@ h2 {
 }
 
 .project-media-slot__track {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 0;
   width: 100%;
   height: 100%;
@@ -2409,10 +2410,31 @@ h2 {
   min-height: 0;
 }
 
+/* Drive-hosted captures: fill 16:10 slot, crop from center (Quantum Cats, Fart Jump, Egypt Slot, etc.). */
+.project-drive-video-shell--center {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.project-drive-video-shell--no-controls video {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.project-drive-video-shell--no-controls video::-webkit-media-controls,
+.project-drive-video-shell--no-controls video::-webkit-media-controls-enclosure,
+.project-drive-video-shell--no-controls video::-webkit-media-controls-panel {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .project-media-slot .project-drive-video-shell video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
 }
 
 .project-media-slot :is(iframe, video, .project-studio-preview) {
@@ -2424,6 +2446,20 @@ h2 {
   border-radius: inherit;
   aspect-ratio: unset !important;
   background: transparent;
+}
+
+.project-media-slot .project-drive-video-shell--center video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto !important;
+  height: auto !important;
+  min-width: 100%;
+  min-height: 100%;
+  max-width: none;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  object-position: center center;
 }
 
 .project-media-slot .project-video-placeholder {
@@ -2439,6 +2475,7 @@ h2 {
 
 .project-card:not(.project-card--ar-mask) video {
   object-fit: cover;
+  object-position: center center;
 }
 
 .project-drive-play-toggle {
@@ -2537,10 +2574,10 @@ h2 {
 
 .project-studio-preview__meta {
   position: absolute;
-  inset: auto 10px 10px 10px;
+  inset: 10px 10px auto auto;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-end;
   gap: 10px;
   pointer-events: none;
 }
@@ -2564,8 +2601,10 @@ h2 {
 .project-studio-preview__brand--floating {
   position: absolute;
   z-index: 4;
-  left: 10px;
-  bottom: 10px;
+  top: 10px;
+  right: 10px;
+  left: auto;
+  bottom: auto;
   pointer-events: none;
 }
 
@@ -3284,6 +3323,7 @@ h2 {
 
   .project-card:not(.project-card--ar-mask) .project-card-preview video {
     object-fit: cover;
+    object-position: center center;
   }
 
   .planet-grid:not(.planet-grid--ar-showcase) .project-card-ar-layout {

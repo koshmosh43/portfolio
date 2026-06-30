@@ -1,6 +1,8 @@
-function driveFileUrl(id) {
-  return `https://drive.google.com/file/d/${id}/view?usp=drive_link`
-}
+import khinkaliShot1 from '../../assets/images/ar-vr/khinkali-1.png'
+import khinkaliShot2 from '../../assets/images/ar-vr/khinkali-2.png'
+import aliensGhostsShot1 from '../../assets/images/ar-vr/aliens-ghosts-1.png'
+import aliensGhostsShot2 from '../../assets/images/ar-vr/aliens-ghosts-2.png'
+import aliensGhostsShot3 from '../../assets/images/ar-vr/aliens-ghosts-3.png'
 
 export const portfolioProjects = Object.freeze({
   planetA: {
@@ -106,17 +108,13 @@ export const portfolioProjects = Object.freeze({
         title: 'AR-mask "Khinkali"',
         videoSourceSize: { w: 9, h: 16 },
         videoUrl: 'https://www.youtube.com/shorts/OYoY-btHBds',
-        screenshots: [driveFileUrl('17KrnE0IUt5S4C2MBg96GFSwlWnE-6ZDY'), driveFileUrl('14lrupev7ct8RaDbU7eCcx92Q4ZhSZ9LC')],
+        screenshots: [khinkaliShot1, khinkaliShot2],
       },
       {
         title: 'AR-mask "Aliens Are Ghosts"',
         videoSourceSize: { w: 9, h: 16 },
         videoUrl: 'https://www.youtube.com/shorts/pNDBIsVjocY',
-        screenshots: [
-          driveFileUrl('1ZfkHltfNMrIgrAQWIYQprnjyq54DSpP4'),
-          driveFileUrl('1XV_-LpQbT-6iTQzcLUu4_gWuv_1j-6lt'),
-          driveFileUrl('1bypzQE2WSZQkoKaM7ObSLD_DzvRe5xg1'),
-        ],
+        screenshots: [aliensGhostsShot1, aliensGhostsShot2, aliensGhostsShot3],
       },
     ],
   },
@@ -131,7 +129,7 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://www.youtube.com/watch?v=dtBFdLOv-XI',
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
-        portfolioPreviewBrand: 'Room 8 Studio | Zerplaay',
+        portfolioPreviewBrand: 'Room 8 Studio',
       },
       {
         title: 'Quantum Cats',
@@ -140,6 +138,7 @@ export const portfolioProjects = Object.freeze({
         linkUrl: 'https://fgfactory.com/',
         linkLabel: 'fgfactory.com',
         portfolioPreviewBrand: 'FGFactory',
+        hideVideoControls: true,
       },
       {
         title: 'Pots-o-Loot',
@@ -156,7 +155,8 @@ export const portfolioProjects = Object.freeze({
         videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
-        portfolioPreviewBrand: 'Room 8 Studio | Zerpaay',
+        portfolioPreviewBrand: 'Room 8 Studio',
+        hideVideoControls: true,
       },
       {
         title: '4 Spicy Frenzy',
@@ -198,6 +198,7 @@ export const portfolioProjects = Object.freeze({
         description: 'Welcome to the mysterious world of ancient Egypt, where pharaohs, pyramids, and riches await!',
         videoUrl: 'https://drive.google.com/file/d/1GOokwaC4xvZ3EqZOJwhcAnTrZG0R2M5u/view?usp=drive_link',
         portfolioPreviewBrand: 'NDA',
+        hideVideoControls: true,
       },
     ],
   },
