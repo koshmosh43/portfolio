@@ -151,7 +151,7 @@ async function fetchTopUtm() {
 
 function buildMessage({ pageviews, uniques, medianSec, countries, utm }) {
   const lines = [
-    `📊 Portfolio — ${DAYS}-day digest`,
+    `📊 Portfolio Digest`,
     '',
     `👁 Pageviews: ${pageviews}`,
     `👤 Unique visitors: ${uniques}`,

@@ -134,12 +134,12 @@ export const portfolioProjects = Object.freeze({
         portfolioPreviewBrand: 'Room 8 Studio | Zerplaay',
       },
       {
-        title: 'Fart Jump Space',
-        description: 'PixiJS micro-game — shipped with Room 8 · Zeerpay: tight loops, playful juice, and a tiny astronaut who really should not have eaten that.',
-        videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
-        linkUrl: 'https://room8studio.com/',
-        linkLabel: 'Room 8 Studio',
-        portfolioPreviewBrand: 'Room 8 Studio | Zerpaay',
+        title: 'Quantum Cats',
+        description: 'Educational physics game for kids built at FGFactory: playful mechanics teach core physics concepts through hands-on experimentation and puzzle-solving.',
+        videoUrl: 'https://drive.google.com/file/d/1bz_iHo8MMU3i0oLEHvkLKit84x0A1T7T/view?usp=drive_link',
+        linkUrl: 'https://fgfactory.com/',
+        linkLabel: 'fgfactory.com',
+        portfolioPreviewBrand: 'FGFactory',
       },
       {
         title: 'Pots-o-Loot',
@@ -149,6 +149,14 @@ export const portfolioProjects = Object.freeze({
         linkLabel: 'Game details',
         portfolioPreviewSrc: 'https://pearfiction.com/wp-content/uploads/2025/10/00198_pots_o_loot.png',
         portfolioPreviewBrand: 'Pear Fiction',
+      },
+      {
+        title: 'Fart Jump Space',
+        description: 'PixiJS micro-game — shipped with Room 8 · Zeerpay: tight loops, playful juice, and a tiny astronaut who really should not have eaten that.',
+        videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
+        linkUrl: 'https://room8studio.com/',
+        linkLabel: 'Room 8 Studio',
+        portfolioPreviewBrand: 'Room 8 Studio | Zerpaay',
       },
       {
         title: '4 Spicy Frenzy',

@@ -38,12 +38,6 @@ export function useSceneFlow() {
     let idleId = 0
     let timeoutId = 0
     const { isDataLite } = readNetworkProfile()
-    const warmModules = [
-      '../../space/Planets',
-      '../../space/Spaceship',
-      '../../space/sceneChunks/CosmicBackgroundChunk',
-      '../../space/sceneChunks/DeepSpaceDecorChunk',
-    ]
     const waitNextFrame = () =>
       new Promise((resolve) => {
         requestAnimationFrame(resolve)
@@ -52,11 +46,14 @@ export function useSceneFlow() {
     const warm = async () => {
       await import('../../space/SpaceScene')
       await waitNextFrame()
-      for (const modulePath of warmModules) {
-        // Yield between imports to keep input handlers responsive.
-        await import(modulePath)
-        await waitNextFrame()
-      }
+      await import('../../space/Planets')
+      await waitNextFrame()
+      await import('../../space/Spaceship')
+      await waitNextFrame()
+      await import('../../space/sceneChunks/CosmicBackgroundChunk')
+      await waitNextFrame()
+      await import('../../space/sceneChunks/DeepSpaceDecorChunk')
+      await waitNextFrame()
       if (!cancelled) dispatch({ type: 'CHUNKS_WARMED' })
     }
 
