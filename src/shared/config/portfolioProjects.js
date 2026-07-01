@@ -3,13 +3,13 @@ import khinkaliShot2 from '../../assets/images/ar-vr/khinkali-2.png'
 import aliensGhostsShot1 from '../../assets/images/ar-vr/aliens-ghosts-1.png'
 import aliensGhostsShot2 from '../../assets/images/ar-vr/aliens-ghosts-2.png'
 import aliensGhostsShot3 from '../../assets/images/ar-vr/aliens-ghosts-3.png'
-import solitaireVideo from '../../assets/videos/Solitaire_game.mov'
-import ginRummyVideo from '../../assets/videos/Gin_Rummy_game.mov'
-import puzzleGameVideo from '../../assets/videos/Puzzle_game.mov'
-import quantumCatsVideo from '../../assets/videos/quantumcats.mov'
-import fartJumpVideo from '../../assets/videos/Fart_Jump_Space.mov'
-import lootboxesVideo from '../../assets/videos/Lootboxes.mov'
-import egyptSlotVideo from '../../assets/videos/Egypt_Slot_Game (3).mov'
+import solitaireVideo from '../../assets/videos/Solitaire_game.mp4'
+import ginRummyVideo from '../../assets/videos/Gin_Rummy_game.mp4'
+import puzzleGameVideo from '../../assets/videos/Puzzle_game.mp4'
+import quantumCatsVideo from '../../assets/videos/quantumcats.mp4'
+import fartJumpVideo from '../../assets/videos/Fart_Jump_Space.mp4'
+import lootboxesVideo from '../../assets/videos/Lootboxes.mp4'
+import egyptSlotVideo from '../../assets/videos/Egypt_Slot_Game (3).mp4'
 
 export const portfolioProjects = Object.freeze({
   planetA: {
@@ -36,19 +36,16 @@ export const portfolioProjects = Object.freeze({
         title: 'Solitaire',
         description: 'Created completely by myself in a few days, using PixiJS + GSAP.',
         videoUrl: solitaireVideo,
-        hideVideoControls: true,
       },
       {
         title: 'Gin Rummy',
         description: 'Also written completely by myself, including all game logic, in 1 month, with only assets and references.',
         videoUrl: ginRummyVideo,
-        hideVideoControls: true,
       },
       {
         title: 'Puzzle Game for Burny Games',
         description: 'Playable ad prototype for Burny Games: built in a few days with PixiJS + GSAP, including game flow and polish.',
         videoUrl: puzzleGameVideo,
-        hideVideoControls: true,
       },
     ],
   },
@@ -148,7 +145,6 @@ export const portfolioProjects = Object.freeze({
         linkUrl: 'https://fgfactory.com/',
         linkLabel: 'fgfactory.com',
         portfolioPreviewBrand: 'FGFactory',
-        hideVideoControls: true,
       },
       {
         title: 'Pots-o-Loot',
@@ -166,7 +162,6 @@ export const portfolioProjects = Object.freeze({
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
         portfolioPreviewBrand: 'Room 8 Studio',
-        hideVideoControls: true,
       },
       {
         title: '4 Spicy Frenzy',
@@ -208,7 +203,6 @@ export const portfolioProjects = Object.freeze({
         description: 'Welcome to the mysterious world of ancient Egypt, where pharaohs, pyramids, and riches await!',
         videoUrl: egyptSlotVideo,
         portfolioPreviewBrand: 'NDA',
-        hideVideoControls: true,
       },
     ],
   },

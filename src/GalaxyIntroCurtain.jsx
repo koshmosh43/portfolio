@@ -124,7 +124,7 @@ export function GalaxyIntroCurtain({
             width={1672}
             height={1431}
             decoding="async"
-            fetchpriority="high"
+            fetchPriority="high"
             loading="eager"
           />
         <div className={`galaxy-intro-curtain__load ${reducedMotion ? 'is-reduced' : ''}`}>
