@@ -270,7 +270,7 @@ export default function App() {
         </Suspense>
       ) : null}
       <p className={`copyright ${portfolio.curtainDismissed ? '' : 'awaiting-intro'}`}>
-        © 2026 Vlada Melnyk. All rights reserved.
+        © 2026 Vlada Melnyk.
       </p>
     </div>
   )

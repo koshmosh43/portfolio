@@ -1,41 +1,13 @@
 import { createPortal } from 'react-dom'
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useAmbientGlowPointer } from './shared/hooks/useAmbientGlowPointer'
-import { usePlanetPanelExclusiveVideoPlayback } from './shared/hooks/usePortfolioPanelVideoPerf'
+import {
+  pauseOtherPanelVideos,
+  usePlanetPanelExclusiveVideoPlayback,
+} from './shared/hooks/usePortfolioPanelVideoPerf'
 import { gsap } from 'gsap'
 import { ExternalLink } from './shared/ui/ExternalLink'
 import { PanelHeader } from './shared/ui/PanelHeader'
-
-/** File id from a Drive share link (`/file/d/<id>/…`). */
-function getGoogleDriveFileId(url) {
-  if (!url) return null
-  try {
-    const parsed = new URL(url)
-    const host = parsed.hostname.replace(/^www\./, '')
-    if (host !== 'drive.google.com') return null
-    const m = parsed.pathname.match(/\/file\/d\/([^/]+)/)
-    return m?.[1] ?? null
-  } catch {
-    const m = typeof url === 'string' ? url.match(/\/file\/d\/([^/]+)/) : null
-    return m?.[1] ?? null
-  }
-}
-
-function googleDriveStreamCandidates(fileId) {
-  return [
-    `https://drive.google.com/uc?export=download&id=${fileId}`,
-    `https://drive.usercontent.google.com/uc?id=${fileId}&export=download`,
-  ]
-}
-
-function googleDrivePreviewIframeUrl(fileId) {
-  return `https://drive.google.com/file/d/${fileId}/preview`
-}
-
-/** Static frame for `<video poster>` — Drive MP4 streams often show black until first decode. */
-function googleDriveVideoPosterUrl(fileId) {
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w960`
-}
 
 /** Pause when off-screen — AR screen captures are heavy when two decode concurrently. */
 function DeckHtmlVideo({ title, preload = 'none', src, poster, videoRef, ...videoProps }) {
@@ -65,97 +37,6 @@ function DeckHtmlVideo({ title, preload = 'none', src, poster, videoRef, ...vide
       title={title}
       {...videoProps}
     />
-  )
-}
-
-/** Drive `/preview` iframe lays out its own UI — it cannot be centered with CSS; prefer `<video>` + direct stream. */
-function GoogleDriveProjectVideo({ fileId, title, hideVideoControls = false }) {
-  const [streamIndex, setStreamIndex] = useState(0)
-  const [useIframe, setUseIframe] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [frameReady, setFrameReady] = useState(false)
-  const videoRef = useRef(null)
-  const candidates = googleDriveStreamCandidates(fileId)
-
-  useEffect(() => {
-    setFrameReady(false)
-  }, [fileId, streamIndex, useIframe])
-
-  const markFrameReady = useCallback(() => {
-    setFrameReady(true)
-  }, [])
-
-  const onDrivePlayToggle = useCallback(() => {
-    const video = videoRef.current
-    if (!video) return
-    if (video.paused || video.ended) {
-      void video.play().catch(() => {})
-      return
-    }
-    video.pause()
-  }, [])
-
-  if (useIframe) {
-    return (
-      <ProjectMediaSlot title={title} ready={frameReady}>
-        <iframe
-          className="project-video-embed"
-          src={googleDrivePreviewIframeUrl(fileId)}
-          title={title}
-          loading="lazy"
-          allow="autoplay; fullscreen"
-          onLoad={markFrameReady}
-        />
-      </ProjectMediaSlot>
-    )
-  }
-
-  const src = candidates[Math.min(streamIndex, candidates.length - 1)]
-  const poster = googleDriveVideoPosterUrl(fileId)
-
-  return (
-    <ProjectMediaSlot title={title} ready={frameReady}>
-      <div
-        className={`project-drive-video-shell project-drive-video-shell--center${
-          hideVideoControls ? ' project-drive-video-shell--no-controls' : ''
-        }`}
-      >
-        <DeckHtmlVideo
-          key={src}
-          videoRef={videoRef}
-          src={src}
-          poster={poster}
-          title={title}
-          controls={hideVideoControls ? undefined : true}
-          disablePictureInPicture
-          controlsList={hideVideoControls ? 'nodownload noplaybackrate nofullscreen' : undefined}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          referrerPolicy="no-referrer"
-          onClick={hideVideoControls ? onDrivePlayToggle : undefined}
-          {...{ 'x-webkit-airplay': 'deny' }}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={() => setIsPlaying(false)}
-          onLoadedData={markFrameReady}
-          onCanPlay={markFrameReady}
-          onError={() => {
-            if (streamIndex + 1 < candidates.length) setStreamIndex((i) => i + 1)
-            else setUseIframe(true)
-          }}
-        />
-        <button
-          type="button"
-          className={`project-drive-play-toggle ${isPlaying ? 'is-hidden' : ''}`}
-          aria-label={`Play ${title}`}
-          onClick={onDrivePlayToggle}
-        >
-          <span aria-hidden>▶</span>
-        </button>
-      </div>
-    </ProjectMediaSlot>
   )
 }
 
@@ -314,42 +195,115 @@ function ProjectVideo({
     const brand = previewBrandFromHref(portfolioPreviewHref || src, portfolioPreviewBrand)
     return <ProjectStudioPreview imageSrc={portfolioPreviewSrc} href={href} brand={brand} title={title} />
   }
-  const driveFileId = getGoogleDriveFileId(src)
-  if (driveFileId) {
-    if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
-    return <GoogleDriveProjectVideo fileId={driveFileId} title={title} hideVideoControls={hideVideoControls} />
-  }
   const youtubeEmbedUrl = getYoutubeEmbedUrl(src)
   if (youtubeEmbedUrl) {
     if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
     return <YoutubeProjectIframe embedUrl={youtubeEmbedUrl} title={title} />
   }
   if (!mediaReady) return <ProjectVideoPlaceholder title={title} />
-  return (
-    <HtmlVideoWithSkeleton src={src} title={title} />
-  )
+  return <HtmlVideoWithSkeleton src={src} title={title} hideVideoControls={hideVideoControls} />
 }
 
-function HtmlVideoWithSkeleton({ src, title }) {
+function HtmlVideoWithSkeleton({ src, title, hideVideoControls = false }) {
   const [ready, setReady] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const videoRef = useRef(null)
 
   useEffect(() => {
     setReady(false)
+    setIsPlaying(false)
   }, [src])
+
+  const markReady = useCallback(() => setReady(true), [])
+
+  const playWhenReady = useCallback(async () => {
+    const video = videoRef.current
+    if (!video) return
+    if (!video.paused && !video.ended) {
+      video.pause()
+      return
+    }
+    pauseOtherPanelVideos(video)
+    const play = () => video.play()
+    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      await play().catch(() => {})
+      return
+    }
+    await new Promise((resolve) => {
+      if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+        resolve()
+        return
+      }
+      video.addEventListener('canplay', () => resolve(), { once: true })
+    })
+    await play().catch(() => {})
+  }, [])
+
+  const onVideoPlay = useCallback(() => {
+    pauseOtherPanelVideos(videoRef.current)
+    setIsPlaying(true)
+  }, [])
+
+  const onPlayToggle = useCallback(
+    (e) => {
+      e?.stopPropagation?.()
+      void playWhenReady()
+    },
+    [playWhenReady],
+  )
+
+  if (hideVideoControls) {
+    return (
+      <ProjectMediaSlot title={title} ready={ready}>
+        <div className="project-drive-video-shell project-drive-video-shell--center project-drive-video-shell--no-controls">
+          <DeckHtmlVideo
+            videoRef={videoRef}
+            src={src}
+            title={title}
+            disablePictureInPicture
+            controlsList="nodownload noplaybackrate nofullscreen"
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            onClick={onPlayToggle}
+            onPlay={onVideoPlay}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
+            onLoadedData={markReady}
+            onCanPlay={markReady}
+            onError={markReady}
+            {...{ 'x-webkit-airplay': 'deny' }}
+          />
+          <button
+            type="button"
+            className={`project-drive-play-toggle ${isPlaying ? 'is-hidden' : ''}`}
+            aria-label={`Play ${title}`}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={onPlayToggle}
+          >
+            <span aria-hidden>▶</span>
+          </button>
+        </div>
+      </ProjectMediaSlot>
+    )
+  }
 
   return (
     <ProjectMediaSlot title={title} ready={ready}>
       <DeckHtmlVideo
+        videoRef={videoRef}
         src={src}
         title={title}
         controls
         disablePictureInPicture
         muted
         loop
-        preload="none"
-        onLoadedData={() => setReady(true)}
-        onCanPlay={() => setReady(true)}
-        onError={() => setReady(true)}
+        preload="metadata"
+        onPlay={onVideoPlay}
+        onLoadedData={markReady}
+        onCanPlay={markReady}
+        onError={markReady}
         {...{ 'x-webkit-airplay': 'deny' }}
       />
     </ProjectMediaSlot>

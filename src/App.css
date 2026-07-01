@@ -2001,14 +2001,14 @@ h2 {
   height: 100%;
 }
 
-/* Full stills in cells (Drive portraits were cropped with global cover). */
+/* Horizontal stills: fill cell, anchor right + vertical center. */
 .planet-grid--ar-showcase .project-card-shot {
   background: rgba(2, 6, 18, 0.2);
 }
 
 .planet-grid--ar-showcase .project-card-shot img {
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: right center;
 }
 
 .planet-grid--ar-showcase .project-card--ar-mask p {
@@ -2331,6 +2331,11 @@ h2 {
   width: 100%;
 }
 
+.project-card:not(.project-card--ar-mask) .project-card-preview {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
 .project-drive-video-shell {
   position: relative;
 }
@@ -2362,8 +2367,7 @@ h2 {
 .project-card:not(.project-card--ar-mask) iframe,
 .project-video-thumb,
 .project-video-poster,
-.project-video-placeholder,
-.project-media-slot {
+.project-video-placeholder {
   width: 100%;
   aspect-ratio: 16 / 10;
   border-radius: 10px;
@@ -2372,16 +2376,25 @@ h2 {
 }
 
 .project-media-slot {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--pf-a) 28%, color-mix(in srgb, var(--pf-b) 22%, rgba(255, 255, 255, 0.12)));
+  background: rgba(2, 4, 10, 0.8);
   position: relative;
   display: block;
   overflow: hidden;
   box-sizing: border-box;
+  aspect-ratio: unset !important;
 }
 
 .project-card:not(.project-card--ar-mask) .project-card-preview .project-media-slot {
-  flex: 1 1 auto;
-  align-self: stretch;
+  position: absolute;
+  inset: 0;
+  flex: none;
+  align-self: auto;
   width: 100%;
+  height: 100%;
   min-width: 0;
   min-height: 0;
 }
@@ -2410,11 +2423,14 @@ h2 {
   min-height: 0;
 }
 
-/* Drive-hosted captures: fill 16:10 slot, crop from center (Quantum Cats, Fart Jump, Egypt Slot, etc.). */
+/* Drive-hosted captures: fill preview slot, crop from center (Quantum Cats, Fart Jump, Egypt Slot, etc.). */
 .project-drive-video-shell--center {
   position: absolute;
   inset: 0;
+  display: grid;
+  grid-template: 1fr / 1fr;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .project-drive-video-shell--no-controls video {
@@ -2430,9 +2446,40 @@ h2 {
   pointer-events: none !important;
 }
 
-.project-media-slot .project-drive-video-shell video {
+.project-drive-video-shell--center > video,
+.project-drive-video-shell--center > .project-drive-video-poster {
+  grid-area: 1 / 1;
+  place-self: center;
   width: 100%;
   height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.project-drive-video-shell--center > video {
+  z-index: 0;
+}
+
+.project-drive-video-shell--center > .project-drive-video-poster {
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.project-drive-video-shell--center > .project-drive-play-toggle {
+  grid-area: 1 / 1;
+  place-self: center;
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 3;
+}
+
+.project-media-slot .project-drive-video-shell video {
   object-fit: cover;
   object-position: center center;
 }
@@ -2446,20 +2493,6 @@ h2 {
   border-radius: inherit;
   aspect-ratio: unset !important;
   background: transparent;
-}
-
-.project-media-slot .project-drive-video-shell--center video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: auto !important;
-  height: auto !important;
-  min-width: 100%;
-  min-height: 100%;
-  max-width: none;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
-  object-position: center center;
 }
 
 .project-media-slot .project-video-placeholder {
@@ -2479,11 +2512,9 @@ h2 {
 }
 
 .project-drive-play-toggle {
-  position: absolute;
-  inset: 0;
-  margin: auto;
   width: 54px;
   height: 54px;
+  margin: 0;
   border: 1px solid color-mix(in srgb, var(--pf-a) 48%, rgba(255, 255, 255, 0.2));
   border-radius: 999px;
   display: grid;
@@ -2493,7 +2524,6 @@ h2 {
     color-mix(in srgb, #0a1020 68%, var(--pf-b));
   color: color-mix(in srgb, var(--pf-a) 78%, #fff);
   cursor: pointer;
-  z-index: 3;
   box-shadow:
     0 10px 24px rgba(0, 0, 0, 0.48),
     0 0 24px color-mix(in srgb, var(--pf-a) 26%, transparent),
@@ -2521,11 +2551,6 @@ h2 {
       0 0 30px color-mix(in srgb, var(--pf-a) 38%, transparent),
       0 0 24px color-mix(in srgb, var(--pf-b) 32%, transparent);
   }
-}
-
-.project-drive-video-shell:focus-within .project-drive-play-toggle {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .project-video-poster {
@@ -2779,6 +2804,7 @@ h2 {
 
 .project-card-shot {
   display: block;
+  width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -2891,6 +2917,7 @@ h2 {
   min-height: 0;
   display: block;
   object-fit: cover;
+  object-position: right center;
 }
 
 @keyframes shotPlaceholderSweep {
@@ -3400,6 +3427,35 @@ h2 {
     scroll-snap-type: y mandatory;
   }
 
+}
+
+/* Tall/narrow viewport (aspect ratio < 1): keep preview band + center-crop stable. */
+@media (max-aspect-ratio: 1/1) {
+  .project-card:not(.project-card--ar-mask) .project-card-preview {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .project-card:not(.project-card--ar-mask) .project-card-preview .project-media-slot,
+  .project-card:not(.project-card--ar-mask) .project-card-preview .project-media-slot__track,
+  .project-card:not(.project-card--ar-mask) .project-card-preview .project-drive-video-shell--center {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: unset !important;
+  }
+
+  .project-drive-video-shell--center > video,
+  .project-drive-video-shell--center > .project-drive-video-poster {
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
 }
 
 @media (orientation: portrait) and (max-width: 1000px) {

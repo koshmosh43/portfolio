@@ -3,6 +3,13 @@ import khinkaliShot2 from '../../assets/images/ar-vr/khinkali-2.png'
 import aliensGhostsShot1 from '../../assets/images/ar-vr/aliens-ghosts-1.png'
 import aliensGhostsShot2 from '../../assets/images/ar-vr/aliens-ghosts-2.png'
 import aliensGhostsShot3 from '../../assets/images/ar-vr/aliens-ghosts-3.png'
+import solitaireVideo from '../../assets/videos/Solitaire_game.mov'
+import ginRummyVideo from '../../assets/videos/Gin_Rummy_game.mov'
+import puzzleGameVideo from '../../assets/videos/Puzzle_game.mov'
+import quantumCatsVideo from '../../assets/videos/quantumcats.mov'
+import fartJumpVideo from '../../assets/videos/Fart_Jump_Space.mov'
+import lootboxesVideo from '../../assets/videos/Lootboxes.mov'
+import egyptSlotVideo from '../../assets/videos/Egypt_Slot_Game (3).mov'
 
 export const portfolioProjects = Object.freeze({
   planetA: {
@@ -28,17 +35,20 @@ export const portfolioProjects = Object.freeze({
       {
         title: 'Solitaire',
         description: 'Created completely by myself in a few days, using PixiJS + GSAP.',
-        videoUrl: 'https://drive.google.com/file/d/1yLg7N-X9L4calIv0_bmpR3L--IywOQsP/view?usp=drive_link',
+        videoUrl: solitaireVideo,
+        hideVideoControls: true,
       },
       {
         title: 'Gin Rummy',
         description: 'Also written completely by myself, including all game logic, in 1 month, with only assets and references.',
-        videoUrl: 'https://drive.google.com/file/d/1dvDxdfeoZqbtw8Mmy7WMzw9DjhWJ6kAs/view?usp=drive_link',
+        videoUrl: ginRummyVideo,
+        hideVideoControls: true,
       },
       {
         title: 'Puzzle Game for Burny Games',
         description: 'Playable ad prototype for Burny Games: built in a few days with PixiJS + GSAP, including game flow and polish.',
-        videoUrl: 'https://drive.google.com/file/d/1Sr4meGMFPxfUSXsvx8MKVcN3FgvPjNnD/view?usp=drive_link',
+        videoUrl: puzzleGameVideo,
+        hideVideoControls: true,
       },
     ],
   },
@@ -51,7 +61,7 @@ export const portfolioProjects = Object.freeze({
         title: 'ESports: Keydrop',
         description:
           'One of the world’s largest CS2 skin-trading and case-opening platforms — high-volume marketplace UX, drops and cases, and real-time inventory and trading flows for a global player base.',
-        videoUrl: 'https://www.youtube.com/watch?v=U69VdMqP1OU',
+        videoUrl: lootboxesVideo,
         linkUrl: 'https://www.keydrop.com/',
         linkLabel: 'keydrop.com',
         portfolioPreviewBrand: 'Keydrop',
@@ -134,7 +144,7 @@ export const portfolioProjects = Object.freeze({
       {
         title: 'Quantum Cats',
         description: 'Educational physics game for kids built at FGFactory: playful mechanics teach core physics concepts through hands-on experimentation and puzzle-solving.',
-        videoUrl: 'https://drive.google.com/file/d/1bz_iHo8MMU3i0oLEHvkLKit84x0A1T7T/view?usp=drive_link',
+        videoUrl: quantumCatsVideo,
         linkUrl: 'https://fgfactory.com/',
         linkLabel: 'fgfactory.com',
         portfolioPreviewBrand: 'FGFactory',
@@ -152,7 +162,7 @@ export const portfolioProjects = Object.freeze({
       {
         title: 'Fart Jump Space',
         description: 'PixiJS micro-game — shipped with Room 8 · Zeerpay: tight loops, playful juice, and a tiny astronaut who really should not have eaten that.',
-        videoUrl: 'https://drive.google.com/file/d/1MuqQTsT4bpZVvkrw4VCIrpI1U6rxYaIw/view?usp=drive_link',
+        videoUrl: fartJumpVideo,
         linkUrl: 'https://room8studio.com/',
         linkLabel: 'Room 8 Studio',
         portfolioPreviewBrand: 'Room 8 Studio',
@@ -196,7 +206,7 @@ export const portfolioProjects = Object.freeze({
       {
         title: 'Egypt Slot Game',
         description: 'Welcome to the mysterious world of ancient Egypt, where pharaohs, pyramids, and riches await!',
-        videoUrl: 'https://drive.google.com/file/d/1GOokwaC4xvZ3EqZOJwhcAnTrZG0R2M5u/view?usp=drive_link',
+        videoUrl: egyptSlotVideo,
         portfolioPreviewBrand: 'NDA',
         hideVideoControls: true,
       },
